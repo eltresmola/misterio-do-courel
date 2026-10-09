@@ -258,6 +258,8 @@ const keys={left:false,right:false,jump:false};
 const player={x:120,y:420,w:34,h:52,vx:0,vy:0,onGround:false,respawnX:120,respawnY:420,lives:3,inv:0,dir:1};
 let camera=0, paused=true, activeChallenge=-1, frame=0, hintTimer=0, nearSign='';
 const solved=Array(8).fill(false);
+// A construción visible está vinculada ao mesmo resultado que valida cada reto.
+const buildReveal=Array(8).fill(0);
 const zones=[
   {x:0,name:'Saída da casa'}, {x:820,name:'Ribeira dos castiñeiros'}, {x:1650,name:'Costa do souto'}, {x:2500,name:'Refuxio da devesa'},
   {x:3350,name:'Outeiro do sinal'}, {x:4300,name:'Lombo das antenas'}, {x:5200,name:'Subida ao castelo'}
@@ -277,7 +279,7 @@ addPlatform(0,560,760,180);
 addPlatform(860,600,240,120,{deco:true,color:'earth'}); // lower river bank
 addPlatform(1100,560,360,180);
 addPlatform(1460,560,250,180);
-addPlatform(1710,520,120,30); addPlatform(1820,480,120,30); addPlatform(1930,440,120,30); addPlatform(2040,400,120,30);
+// As nove pegadas do souto son construídas na reparación 2.
 addPlatform(2160,560,280,180);
 addPlatform(2520,560,250,180);
 addPlatform(2780,520,110,30); addPlatform(2890,480,110,30); addPlatform(3000,440,110,30); addPlatform(3110,400,110,30);
@@ -292,12 +294,11 @@ addPlatform(5640,510,120,28); addPlatform(5760,460,120,28); addPlatform(5880,410
 addPlatform(6000,360,180,28);
 
 // Unlockable bridges / steps / supports
-addPlatform(760,520,110,24,{requires:0,color:'wood'});
-addPlatform(850,500,110,24,{requires:0,color:'wood'});
-addPlatform(940,480,120,24,{requires:0,color:'wood'});
-addPlatform(1600,520,110,28,{requires:1,color:'stone'});
-addPlatform(1710,480,110,28,{requires:1,color:'stone'});
-addPlatform(1820,440,110,28,{requires:1,color:'stone'});
+addPlatform(760,520,110,24,{requires:0,color:'stone'});
+addPlatform(850,500,110,24,{requires:0,color:'stone'});
+addPlatform(940,480,120,24,{requires:0,color:'stone'});
+// Exactamente nove chanzos desbloqueables, visibles e utilizables.
+for(let j=0;j<9;j++)addPlatform(1600+j*64,540-j*20,64,24,{requires:1,color:'stone',stageStep:j});
 addPlatform(2310,500,90,24,{requires:2,color:'wood'}); addPlatform(2395,470,90,24,{requires:2,color:'wood'});
 addPlatform(2660,500,120,24,{requires:3,color:'stone'}); addPlatform(2780,470,120,24,{requires:3,color:'stone'}); addPlatform(2900,440,120,24,{requires:3,color:'stone'});
 addPlatform(3350,480,90,24,{requires:4,color:'metal'}); addPlatform(3440,450,90,24,{requires:4,color:'metal'}); addPlatform(3530,420,90,24,{requires:4,color:'metal'});
@@ -319,7 +320,7 @@ const challenges=[
     prompt:'2³ = ?', answer:8,
     why:'Aquí a potencia indica repetición rápida: 2·2·2. Úsase para contar pequenos conxuntos iguais sen facelo a man un por un.',
     hints:['Lembra: 2³ significa 2·2·2.','Primeiro 2·2 = 4. Logo 4·2 = 8.','O sistema colocará 8 lousas.'],
-    steps:['A base é 2 e o expoñente é 3.','Multiplica 2 por si mesmo 3 veces: 2·2·2.','O resultado é 8.'], visual:'stones', unlockText:'Aparece unha primeira ponte de madeira sobre o regato.'
+    steps:['A base é 2 e o expoñente é 3.','Multiplica 2 por si mesmo 3 veces: 2·2·2.','O resultado é 8.'], visual:'stones', unlockText:'Constrúense exactamente 8 lousas de pedra sobre o regato.'
   },
   {
     x:1520,y:500,zone:'Ribeira dos castiñeiros',title:'As escaleiras do souto',topic:'Potencia simple',
@@ -327,7 +328,7 @@ const challenges=[
     prompt:'3² = ?', answer:9,
     why:'Un cadrado de lado 3 ten 3×3 pezas. Por iso 3² axuda a ver superficies e repeticións en forma cadrada.',
     hints:['3² significa 3·3.','Un cadrado de 3 por 3 ten 9 cadradiños.','Polo tanto, soben 9 chanzos.'],
-    steps:['Escribe 3² como 3·3.','Multiplica 3×3.','O resultado final é 9.'], visual:'stairs', unlockText:'Actívanse os chanzos de pedra da costa.'
+    steps:['Escribe 3² como 3·3.','Multiplica 3×3.','O resultado final é 9.'], visual:'stairs', unlockText:'Actívanse 9 chanzos de pedra polos que agora podes subir.'
   },
   {
     x:2220,y:540,zone:'Costa do souto',title:'A ponte dos castiñeiros',topic:'Produto de potencias da mesma base',
@@ -335,7 +336,7 @@ const challenges=[
     prompt:'2³ · 2² = ?', answer:32,
     why:'Ao multiplicar potencias da mesma base, súmanse expoñentes. É unha forma rápida de contar estruturas repetidas en grupos.',
     hints:['As dúas potencias teñen base 2.','Suma os expoñentes: 3 + 2 = 5.','Entón 2³·2² = 2⁵ = 32.'],
-    steps:['Observa que a base é a mesma: 2.','Suma os expoñentes: 3+2 = 5.','Calcula 2⁵ = 32.'], visual:'bridge', unlockText:'A ponte longa queda completa e xa podes cruzar o barranco.'
+    steps:['Observa que a base é a mesma: 2.','Suma os expoñentes: 3+2 = 5.','Calcula 2⁵ = 32.'], visual:'bridge', unlockText:'Colócanse 32 táboas en 8 módulos de 4 táboas cada un.'
   },
   {
     x:3180,y:380,zone:'Refuxio da devesa',title:'As caixas do refuxio',topic:'Cociente de potencias da mesma base',
@@ -343,7 +344,7 @@ const challenges=[
     prompt:'5⁴ ÷ 5² = ?', answer:25,
     why:'Ao dividir potencias da mesma base, réstanse os expoñentes. Isto axuda a repartir grandes cantidades en lotes iguais.',
     hints:['A base é 5 nas dúas potencias.','Resta os expoñentes: 4 − 2 = 2.','Entón 5² = 25.'],
-    steps:['Escribe 5⁴ ÷ 5² como 5^(4−2).','4−2 = 2.','Calcula 5² = 25.'], visual:'boxes', unlockText:'Ordénanse as caixas e móvese a pasarela do refuxio.'
+    steps:['Escribe 5⁴ ÷ 5² como 5^(4−2).','4−2 = 2.','Calcula 5² = 25.'], visual:'boxes', unlockText:'Ordénanse 25 caixas, con 25 pilas en cada unha; ábrese a pasarela.'
   },
   {
     x:3660,y:540,zone:'Refuxio da devesa',title:'A torre da auga',topic:'Potencia dunha potencia',
@@ -351,7 +352,7 @@ const challenges=[
     prompt:'(2³)² = ?', answer:64,
     why:'Cando unha potencia se eleva a outra, multiplícanse os expoñentes. Serve para simplificar medidas repetidas en varios niveis.',
     hints:['Nunha potencia doutra potencia, multiplícanse os expoñentes.','3 × 2 = 6.','(2³)² = 2⁶ = 64.'],
-    steps:['Aplica a regra: (a^m)^n = a^(m·n).','Multiplica 3·2 = 6.','Calcula 2⁶ = 64.'], visual:'tower', unlockText:'A torre reparada verte auga e aparece un tramo metálico.'
+    steps:['Aplica a regra: (a^m)^n = a^(m·n).','Multiplica 3·2 = 6.','Calcula 2⁶ = 64.'], visual:'tower', unlockText:'A torre gaña unha base de 64 bloques, colocados en 8 filas de 8.'
   },
   {
     x:4460,y:540,zone:'Outeiro do sinal',title:'O repetidor do val',topic:'Potencias de 10',
@@ -359,7 +360,7 @@ const challenges=[
     prompt:'10⁵ ÷ 10² = ?', answer:1000,
     why:'As potencias de 10 fan máis doado traballar con cantidades enormes, como datos, pulsos, medidas e capacidades.',
     hints:['Ao dividir, resta os expoñentes.','5 − 2 = 3.','10³ = 1000.'],
-    steps:['Escribe 10⁵ ÷ 10² como 10^(5−2).','5−2 = 3.','10³ = 1000.'], visual:'signal', unlockText:'O repetidor acéndese e a ruta de madeira cara á antena móvese.'
+    steps:['Escribe 10⁵ ÷ 10² como 10^(5−2).','5−2 = 3.','10³ = 1000.'], visual:'signal', unlockText:'Actívanse 100 paquetes de 1.000 pulsos e a ruta á antena.'
   },
   {
     x:5340,y:340,zone:'Lombo das antenas',title:'O muro da rocha',topic:'Potencia para volume e bloques',
@@ -367,7 +368,7 @@ const challenges=[
     prompt:'4³ = ?', answer:64,
     why:'As potencias tamén aparecen ao calcular volumes de cubos e ao contar bloques organizados en 3 dimensións.',
     hints:['4³ significa 4·4·4.','4·4 = 16. Despois 16·4 = 64.','Fanse 64 bloques.'],
-    steps:['Converte 4³ en 4·4·4.','Multiplica 4×4 = 16.','Multiplica 16×4 = 64.'], visual:'blocks', unlockText:'Aparecen bloques de pedra na última subida.'
+    steps:['Converte 4³ en 4·4·4.','Multiplica 4×4 = 16.','Multiplica 16×4 = 64.'], visual:'blocks', unlockText:'Colócanse 64 bloques, en catro capas de 4 × 4, na subida final.'
   },
   {
     x:5900,y:390,zone:'Subida ao castelo',title:'A luz das ruínas',topic:'Operacións combinadas con potencias',
@@ -375,7 +376,7 @@ const challenges=[
     prompt:'5² · 2³ − 3⁴ = ?', answer:119,
     why:'Nun mesmo problema as potencias poden combinarse con produtos e restas. As matemáticas non están separadas: colaboran entre si para controlar sistemas reais.',
     hints:['Primeiro resolve 5², 2³ e 3⁴.','Despois multiplica 25×8 e resta 81.','200−81 = 119.'],
-    steps:['5² = 25, 2³ = 8 e 3⁴ = 81.','25×8 = 200.','200−81 = 119.'], visual:'beacon', unlockText:'A baliza queda acesa e unha escalinata final leva ata o castelo.'
+    steps:['5² = 25, 2³ = 8 e 3⁴ = 81.','25×8 = 200.','200−81 = 119.'], visual:'beacon', unlockText:'A baliza recibe 119 unidades de enerxía e ilumina as ruínas.'
   }
 ];
 
@@ -384,7 +385,7 @@ const terminals=challenges.map((c,i)=>({x:c.x,y:c.y,w:44,h:60,id:i}));
 
 const enemies=[
   {x:1220,y:528,w:34,h:20,left:1170,right:1390,vx:1.15,dead:false},
-  {x:1760,y:488,w:34,h:20,left:1715,right:1810,vx:1.05,dead:false},
+  {x:1760,y:448,w:34,h:20,left:1735,right:1785,vx:1.05,dead:false},
   {x:1970,y:408,w:34,h:20,left:1940,right:2050,vx:1.2,dead:false},
   {x:2460,y:528,w:34,h:20,left:2190,right:2480,vx:1.25,dead:false},
   {x:3040,y:408,w:34,h:20,left:3010,right:3110,vx:1.05,dead:false},
@@ -410,7 +411,7 @@ function launchIntro(){
     <div class="grid2">
       <div class="card">
         <h3>Que atoparás?</h3>
-        <p>Unha ponte rota, costas con chanzos, un refuxio, antenas, balizas e a subida final ao castelo. Cada cálculo arranxa algo no escenario.</p>
+        <p>Unha ponte rota, costas con chanzos, un refuxio, antenas, balizas e a subida final ao castelo. Cada cálculo coloca unha cantidade concreta de pezas ou activa unha cantidade concreta de enerxía no escenario.</p>
         <div class="hintBox">⚠️ <b>Atención ás carrachas:</b> se lles saltas enriba, elimínasas. Se che tocan de lado, perdes unha vida.</div>
       </div>
       <div class="card">
@@ -532,7 +533,7 @@ function openChallenge(i){
     const v=Number(text);
     if(!text){feedback.textContent='Introduce primeiro unha resposta.'; refreshScroll();return;}
     if(v===p.answer){
-      solved[i]=true; progressLabel.textContent=`${solved.filter(Boolean).length} / 8`;
+      solved[i]=true; buildReveal[i]=0; progressLabel.textContent=`${solved.filter(Boolean).length} / 8`;
       player.respawnX=p.x+70; player.respawnY=Math.max(120,p.y-20); activeChallenge=-1;
       panel.innerHTML=`<div class="eyebrow">✅ Reparación completada</div><h2>${p.title} arranxada!</h2><p><b>${p.answer}</b> era o valor correcto. ${p.unlockText}</p><div class="hintBox">${p.why}</div><div class="actions"><button class="btnMain" id="resumeBtn">Volver ao camiño →</button></div>`;
       panel.scrollTop=0; refreshScroll();
@@ -627,6 +628,10 @@ function stompEnemy(enemy){ enemy.dead=true; player.vy=-8; showToast('Carracha e
 function update(){
   if(paused) return;
   frame++;
+  for(let i=0;i<solved.length;i++) if(solved[i]){
+    const parts=i===5?100:challenges[i].answer;
+    buildReveal[i]=Math.min(parts,buildReveal[i]+Math.max(0.55,parts/65));
+  }
   if(toast.classList.contains('show') && performance.now()>Number(toast.dataset.until||0)) toast.classList.remove('show');
   if(player.inv>0) player.inv--;
   const speed=4.2;
@@ -779,12 +784,189 @@ function drawPlayer(){
   ctx.restore();
 }
 
+// Construcións: os valores son os propios das operacións, non números decorativos.
+// Contamos cada peza desde o modelo da reparación e etiquetamos explicitamente os grupos.
+function worldPanel(wx,wy,width,title,subtitle){
+  const x=wx-camera;
+  if(x+width<-15||x>W+15)return;
+  ctx.fillStyle='rgba(18,30,56,.89)'; roundWorld(x,wy,width,48,10);ctx.fill();
+  ctx.strokeStyle='#c9d7ed';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.fillStyle='#fff6d7';ctx.font='900 17px Fredoka, Nunito, sans-serif';ctx.fillText(title,x+10,wy+20);
+  ctx.fillStyle='#bcecdf';ctx.font='800 12px Nunito, sans-serif';ctx.fillText(subtitle,x+10,wy+38);
+}
+function roundWorld(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
+function stonePiece(wx,wy,w,h,idx,lit=true){
+  const x=wx-camera;
+  ctx.fillStyle='#46546d';roundWorld(x,wy+4,w,h,3);ctx.fill();
+  ctx.fillStyle=lit?'#c8d7eb':'#8196b2';roundWorld(x,wy,w,h,3);ctx.fill();
+  ctx.strokeStyle='#425578';ctx.lineWidth=1.7;ctx.stroke();
+  ctx.strokeStyle='#e8f0f7';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x+3,wy+5);ctx.lineTo(x+w-4,wy+5);ctx.stroke();
+}
+function drawBuild0(){
+  if(!solved[0])return;
+  // Three supporting platforms but exactly EIGHT separate stones: 3 + 3 + 2.
+  const supports=platforms.filter(p=>p.requires===0);
+  let piece=0;
+  for(let si=0;si<supports.length;si++){
+    const p=supports[si], n=[3,3,2][si],gap=3;
+    for(let j=0;j<n;j++){
+      if(piece<Math.floor(buildReveal[0])){
+        const width=(p.w-(n+1)*gap)/n;
+        stonePiece(p.x+gap+j*(width+gap),p.y-12,width,13,piece);
+      }
+      piece++;
+    }
+  }
+  worldPanel(762,412,193,'8 lousas', '2³ = 8 · tres tramos');
+}
+function drawBuild1(){
+  if(!solved[1])return;
+  for(let j=0;j<challenges[1].answer;j++){
+    if(j>=Math.floor(buildReveal[1]))continue;
+    const p=platforms.find(t=>t.stageStep===j);
+    if(!p)continue;
+    stonePiece(p.x+2,p.y-12,p.w-4,14,j);
+    const x=p.x-camera;
+    ctx.fillStyle='#273553';ctx.font='900 13px Fredoka';ctx.fillText(String(j+1),x+25,p.y+15);
+  }
+  worldPanel(1633,338,240,'9 chanzos', '3² = 9 · do 1 ao 9');
+}
+function drawBuild2(){
+  if(!solved[2])return;
+  const ps=platforms.filter(p=>p.requires===2);
+  for(let module=0;module<8;module++){
+    const sup=ps[Math.floor(module/4)],k=module%4;
+    if(!sup)continue;
+    const mW=sup.w/4,base=sup.x+k*mW;
+    // Each module contains FOUR distinct wooden boards, 8 × 4 = 32.
+    for(let board=0;board<4;board++){
+      const id=module*4+board;
+      if(id>=Math.floor(buildReveal[2]))continue;
+      const x=base+(board+.12)*mW/4-camera;
+      ctx.fillStyle='#a76539';roundWorld(x,sup.y-14,mW*.19,15,2);ctx.fill();
+      ctx.strokeStyle='#edc48b';ctx.lineWidth=1;ctx.stroke();
+    }
+    ctx.strokeStyle='#f7d39e';ctx.lineWidth=2;
+    ctx.strokeRect(base-camera,sup.y-17,mW,19);
+  }
+  worldPanel(2312,387,245,'32 táboas = 8 × 4','8 módulos · 4 táboas cada un');
+}
+function drawBuild3(){
+  if(!solved[3])return;
+  const total=challenges[3].answer; // 25 pilas por caixa; 25 caixas.
+  const startX=3266,startY=342;
+  ctx.fillStyle='#334865';ctx.fillRect(startX-9-camera,startY-18,166,180);
+  ctx.strokeStyle='#e6cd9e';ctx.lineWidth=3;ctx.strokeRect(startX-9-camera,startY-18,166,180);
+  // 25 caixas, as 25 posicións da representación da escena.
+  for(let b=0;b<25;b++){
+    if(b>=Math.floor(buildReveal[3]))continue;
+    const x=startX+(b%5)*31-camera,y=startY+Math.floor(b/5)*32;
+    ctx.fillStyle='#c28b55';roundWorld(x,y,28,25,3);ctx.fill();
+    ctx.strokeStyle='#694730';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.fillStyle='#fff6df';ctx.font='800 12px Fredoka';ctx.fillText('25',x+7,y+18);
+  }
+  // Unha caixa aberta explicativa, que contén realmente 5 × 5 = 25 pilas.
+  const zx=3460-camera,zy=362;
+  ctx.fillStyle='#e4bd82';roundWorld(zx,zy,158,139,9);ctx.fill();
+  ctx.strokeStyle='#78563e';ctx.lineWidth=3;ctx.stroke();
+  for(let battery=0;battery<25;battery++){
+    const bx=zx+14+(battery%5)*27,by=zy+15+Math.floor(battery/5)*23;
+    ctx.fillStyle='#304b72';roundWorld(bx,by,14,20,3);ctx.fill();
+    ctx.fillStyle='#98e5d1';ctx.fillRect(bx+2,by+2,10,12);
+    ctx.fillStyle='#e8ecf6';ctx.fillRect(bx+5,by-3,4,4);
+  }
+  worldPanel(3265,275,352,'25 caixas × 25 pilas','625 pilas repartidas por igual');
+}
+function drawBuild4(){
+  if(!solved[4])return;
+  const bx=3762,by=358;
+  // Base dun depósito: 8 filas × 8 bloques, como no esquema.
+  ctx.fillStyle='#4f7081';ctx.fillRect(3755-camera,by+2,170,191);
+  ctx.fillStyle='#78b9c7';roundWorld(3779-camera,by-36,129,43,13);ctx.fill();
+  ctx.strokeStyle='#2d536d';ctx.lineWidth=4;ctx.stroke();
+  for(let block=0;block<64;block++){
+    if(block>=Math.floor(buildReveal[4]))continue;
+    const x=bx+(block%8)*19,y=by+20+Math.floor(block/8)*21;
+    stonePiece(x,y,17,19,block);
+  }
+  worldPanel(3723,290,248,'64 bloques na torre','8 filas × 8 · (2³)² = 64');
+}
+function drawBuild5(){
+  if(!solved[5])return;
+  const left=4495,top=355;
+  ctx.fillStyle='#304d67';roundWorld(left-10-camera,top-19,192,184,12);ctx.fill();
+  ctx.strokeStyle='#a1d5df';ctx.lineWidth=2;ctx.stroke();
+  // There are 10² PACKAGES; each holds 10³ = 1000 pulses.
+  for(let pack=0;pack<100;pack++){
+    if(pack>=Math.floor(buildReveal[5]))continue;
+    const x=left+(pack%10)*17,y=top+Math.floor(pack/10)*15;
+    ctx.fillStyle='#76deca';roundWorld(x-camera,y,13,10,2);ctx.fill();
+    ctx.strokeStyle='#25665a';ctx.lineWidth=1;ctx.stroke();
+  }
+  ctx.strokeStyle='#dbeaf5';ctx.lineWidth=6;
+  ctx.beginPath();ctx.moveTo(4675-camera,top);ctx.lineTo(4675-camera,top-103);ctx.stroke();
+  ctx.beginPath();ctx.arc(4675-camera,top-103,11,0,Math.PI*2);
+  ctx.fillStyle='#ffe2a0';ctx.fill();
+  worldPanel(4485,273,282,'100 paquetes de 1.000 pulsos','10² paquetes × 10³ = 10⁵ pulsos');
+}
+function drawBuild6(){
+  if(!solved[6])return;
+  const left=5440,top=312;
+  // Four separate layers laid out 2×2: no stone is hidden under another.
+  // Each layer contains 4 rows × 4 blocks = 16; 4 × 16 = 64 visible stones.
+  for(let layer=0;layer<4;layer++){
+    const ox=left+(layer%2)*112, oy=top+Math.floor(layer/2)*95;
+    const x=ox-camera;
+    ctx.fillStyle='#455a71';roundWorld(x-5,oy-19,86,88,6);ctx.fill();
+    ctx.strokeStyle='#a7bed0';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle='#fff5cf';ctx.font='900 13px Fredoka';ctx.fillText('CAPA '+(layer+1),x+5,oy-5);
+    for(let k=0;k<16;k++){
+      const idx=layer*16+k;
+      if(idx>=Math.floor(buildReveal[6]))continue;
+      const bx=ox+(k%4)*19,by=oy+Math.floor(k/4)*14;
+      stonePiece(bx,by,17,12,idx);
+    }
+  }
+  worldPanel(5434,240,250,'64 bloques de pedra','4 capas × 4 filas × 4 bloques');
+}
+function drawBuild7(){
+  if(!solved[7])return;
+  const x=6002,top=142;
+  // 25 placas producen 8 cada unha: 200; desconta 81 => 119.
+  ctx.fillStyle='#344d65';roundWorld(5834-camera,236,137,136,10);ctx.fill();
+  for(let panel=0;panel<25;panel++){
+    const px=5845+(panel%5)*24-camera,py=248+Math.floor(panel/5)*22;
+    ctx.fillStyle='#6bc0c9';roundWorld(px,py,20,17,2);ctx.fill();
+    ctx.strokeStyle='#2d6574';ctx.lineWidth=1;ctx.stroke();
+  }
+  // Gauge with ONE lit cell per energy unit (7 rows × 17 = 119).
+  ctx.fillStyle='#293b5c';roundWorld(x-camera,top,169,133,12);ctx.fill();
+  ctx.strokeStyle='#decf96';ctx.lineWidth=2.5;ctx.stroke();
+  for(let unit=0;unit<119;unit++){
+    if(unit>=Math.floor(buildReveal[7]))continue;
+    const px=x+12+(unit%17)*9,py=top+14+Math.floor(unit/17)*16;
+    ctx.fillStyle='#ffe48d';roundWorld(px-camera,py,7,13,2);ctx.fill();
+  }
+  ctx.strokeStyle='#f8e9b6';ctx.lineWidth=7;
+  ctx.beginPath();ctx.moveTo(6085-camera,top);ctx.lineTo(6085-camera,75);ctx.stroke();
+  ctx.fillStyle='#ffe8a1';ctx.beginPath();ctx.arc(6085-camera,70,20+Math.sin(frame*.12)*3,0,Math.PI*2);ctx.fill();
+  worldPanel(5806,164,186,'25 placas × 8 = 200','200 − 81 = 119');
+  worldPanel(5999,286,170,'119 unidades','119 celas da baliza');
+}
+function drawConstructions(){
+  for(let i=0;i<solved.length;i++){
+    if(!solved[i])continue;
+    [drawBuild0,drawBuild1,drawBuild2,drawBuild3,drawBuild4,drawBuild5,drawBuild6,drawBuild7][i]();
+  }
+}
+
 function drawHUDObjects(){
   for(const p of activePlatforms()) drawGroundPlatform(p);
+  drawHome(); drawCastle();
+  drawConstructions();
   for(const s of signs){ const x=s.x-camera, y=505; if(x>-50&&x<W+50){ ctx.fillStyle='#774d2c'; ctx.fillRect(x,y,8,42); ctx.fillStyle='#f8df8e'; ctx.fillRect(x-34,y-24,78,26); ctx.fillStyle='#413217'; ctx.font='900 12px Nunito'; ctx.fillText('ATENCIÓN',x-26,y-7); }}
   terminals.forEach((t,i)=>drawTerminal(t,solved[i]));
   enemies.forEach(drawTick);
-  drawHome(); drawCastle();
 }
 
 function render(){
