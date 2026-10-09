@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="gl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f1630">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>O código do Carbedo — versión ampliada</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800;900&display=swap');
+:root{
+  --bg:#0f1630; --bg2:#16244f; --ink:#f5f4ff; --muted:#c7d4ff; --gold:#ffd978; --gold2:#ffbe4a;
+  --teal:#75d7c3; --mint:#bff0e8; --card:#172145; --card2:#101836; --line:#2b3b78; --danger:#ff6d6d;
+  --grass:#57914d; --grass2:#426f3b; --earth:#6d5238; --earth2:#5a422e; --stone:#8e95b7; --stone2:#717897;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:radial-gradient(circle at 20% 0%,#22397e 0%,#121a39 50%,#0a1022 100%);color:var(--ink);font-family:Nunito,system-ui,sans-serif}
+body{display:flex;justify-content:center;align-items:flex-start;padding:12px}
+#app{width:min(1320px,100%)}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:58px;height:58px;border-radius:18px;background:linear-gradient(145deg,#ffe6a0,#f9b741);display:grid;place-items:center;box-shadow:0 10px 25px #0005;color:#172145;font-size:30px}
+h1{margin:0;font:900 clamp(26px,4.2vw,42px)/1 Fredoka, Nunito, sans-serif;letter-spacing:.3px}
+.sub{font-size:14px;color:var(--muted);margin-top:2px}
+.badges{display:flex;gap:10px;flex-wrap:wrap}
+.badge{background:#101939;border:2px solid #324688;color:#e9f0ff;border-radius:999px;padding:8px 14px;font-weight:800}
+.shell{position:relative;overflow:hidden;border-radius:28px;border:4px solid #354b8e;box-shadow:0 18px 60px #0008, inset 0 0 0 2px #7fa8ff1a;background:linear-gradient(180deg,#5179c7 0%,#6885be 35%,#7e9b95 70%,#7fa45f 100%)}
+canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;background:transparent}
+.hud{position:absolute;left:14px;right:14px;top:14px;display:flex;justify-content:space-between;gap:12px;pointer-events:none;z-index:2}
+.pill{background:rgba(11,18,41,.84);backdrop-filter:blur(6px);border:2px solid #4862af;color:#fff;border-radius:18px;padding:10px 14px;box-shadow:0 10px 25px #0004;min-width:120px}
+.pill b{display:block;font-size:13px;color:#adc5ff;letter-spacing:.4px;text-transform:uppercase}.pill span{font:800 clamp(18px,2.3vw,28px)/1.1 Fredoka, Nunito, sans-serif}
+.hintBar{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;width:min(88%,860px);background:rgba(12,18,37,.88);border:2px solid #4a63ae;border-radius:18px;padding:10px 16px;text-align:center;font-weight:800;color:#fff8cc;box-shadow:0 12px 30px #0006;z-index:2}
+.toast{position:absolute;right:16px;bottom:70px;max-width:min(420px,80%);padding:14px 18px;border-radius:18px;background:rgba(8,14,31,.92);border:2px solid #4e64ac;font-weight:800;color:#e9efff;box-shadow:0 18px 40px #0008;display:none;z-index:3}
+.toast.show{display:block}
+.modal{position:absolute;inset:0;background:rgba(6,10,24,.72);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:18px;z-index:4}
+.modal.show{display:flex}
+.panel{width:min(1080px,100%);max-height:100%;overflow:auto;background:linear-gradient(180deg,#172145 0%,#101734 100%);border:3px solid #40579e;border-radius:28px;padding:clamp(16px,2.6vw,28px);box-shadow:0 24px 80px #000a}
+.eyebrow{display:inline-flex;gap:8px;align-items:center;background:#27386f;border-radius:999px;padding:7px 12px;font-size:13px;font-weight:900;color:#ffd978;text-transform:uppercase;letter-spacing:.7px}
+.panel h2{margin:12px 0 6px;font:900 clamp(30px,4.6vw,48px)/1 Fredoka, Nunito, sans-serif;color:#fff}
+.panel p{margin:8px 0 14px;color:#ebf0ff;font-size:17px;line-height:1.45}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 18px}.stats span{background:#10204a;border:1px solid #40589d;border-radius:14px;padding:9px 12px;font-weight:800;color:#dfe9ff}
+.grid2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.95fr);gap:16px;align-items:start}
+.card{background:linear-gradient(180deg,#0f1734,#15214c);border:2px solid #33457e;border-radius:24px;padding:16px;box-shadow:inset 0 0 0 1px #7aa1ff1a}
+.card h3{margin:0 0 10px;font:800 clamp(20px,2.1vw,26px)/1.15 Fredoka, Nunito, sans-serif;color:#fff8cf}.mini{font-size:14px;color:#b6c7f0;font-weight:800}
+.codeCard{background:linear-gradient(180deg,#fff7de,#ffe6a4);color:#1a2142;border-radius:22px;border:2px solid #f7bb47;padding:14px;box-shadow:0 8px 0 #9c7330}.codeCard .label{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.6px;color:#885816}.formula{font:800 clamp(23px,3.2vw,36px)/1.25 Fredoka, Nunito, sans-serif;margin:8px 0}
+.answerRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}.answerRow input{flex:1;min-width:180px;background:#fff;border:3px solid #2f467f;border-radius:14px;padding:12px 14px;font:800 28px/1 Fredoka, Nunito, sans-serif;color:#16214d}.answerRow .unit{font-weight:900;color:#eef2ff}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+button{border:0;border-radius:16px;padding:12px 18px;font-family:inherit;font-weight:900;font-size:16px;cursor:pointer}
+.btnMain{background:linear-gradient(180deg,#80ead0,#57c8b2);color:#0f2431;box-shadow:0 6px 0 #2f8979}
+.btnAlt{background:linear-gradient(180deg,#ffe59e,#ffc857);color:#4f3508;box-shadow:0 6px 0 #b17a22}
+.btnGhost{background:linear-gradient(180deg,#e6ebff,#cbd6ff);color:#1d2a5e;box-shadow:0 6px 0 #7d91d3}
+button:active{transform:translateY(4px);box-shadow:none}
+.feedback{min-height:26px;margin-top:12px;color:#ffd48e;font-weight:900}
+.steps{margin-top:12px;display:none}.steps.show{display:block}.step{background:#12204a;border-left:4px solid #7bdcc8;border-radius:12px;padding:10px 12px;margin-top:8px;color:#eef2ff}.hintBox{background:#12204a;border:2px dashed #7bdcc8;border-radius:18px;padding:12px;color:#eef2ff;font-weight:800}
+.scratchWrap{background:linear-gradient(180deg,#1d2955,#131b3b);border:2px solid #4258a0;border-radius:20px;padding:10px;margin-top:12px}.scratchHead{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#fff;font-weight:900;margin-bottom:8px}
+.scratchPaper{position:relative;border-radius:16px;overflow:hidden;border:2px solid #6683d0;background:#fff;background-image:linear-gradient(#d5e0ff 1px, transparent 1px), linear-gradient(90deg,#d5e0ff 1px, transparent 1px);background-size:32px 32px;height:320px;touch-action:none}
+#scratch{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.keypad{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:10px}.keypad button{padding:12px 0;background:#f5f7ff;color:#132052;border:2px solid #2f467f;box-shadow:0 4px 0 #7d91d3;font:800 23px/1 Fredoka, Nunito, sans-serif}.keypad .wide{grid-column:span 2;background:#ffd978;color:#4e3300;box-shadow:0 4px 0 #b9861d}
+.visualArea{display:grid;gap:12px}
+.visualStage{min-height:230px;background:linear-gradient(180deg,#23356f 0%,#4b6c8f 50%,#6b9b72 51%,#587f52 100%);border-radius:20px;border:2px solid #4d66b6;padding:14px;position:relative;overflow:hidden}
+.visualNote{background:#111b3c;border:2px solid #354b8b;border-radius:16px;padding:12px;color:#eff2ff;font-weight:800}
+.badgeRow{display:flex;gap:10px;flex-wrap:wrap}.microBadge{background:#0f1734;border:1px solid #40589d;border-radius:12px;padding:8px 10px;color:#d7e4ff;font-size:13px;font-weight:900}
+.controls{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+.controls .text{color:#d6e2ff;font-size:14px}.touch{display:flex;gap:10px;flex-wrap:wrap}.touch button{min-width:74px;height:58px;background:linear-gradient(180deg,#eaf0ff,#cfdbff);color:#142155;border:2px solid #33467f;box-shadow:0 5px 0 #7a91d2;font:900 22px/1 Fredoka, Nunito, sans-serif}.touch .jump{min-width:110px;background:linear-gradient(180deg,#ffe59e,#ffc858);color:#5c3904;box-shadow:0 5px 0 #b47c1a}
+.note{margin-top:10px;font-size:14px;color:#c9d7ff}
+.footerLine{margin-top:10px;font-size:13px;color:#b9c6eb}
+.vis-bg-moon{position:absolute;right:18px;top:18px;width:82px;height:82px;background:#ffe58d;border-radius:50%;box-shadow:0 0 0 8px rgba(255,229,141,.18)}
+.vis-ground{position:absolute;left:0;right:0;bottom:0;height:64px;background:#5e874d}
+.vis-char{position:absolute;left:34px;bottom:48px;width:54px;height:92px}.vis-char .head{position:absolute;left:14px;top:0;width:26px;height:26px;background:#ffd1a9;border-radius:50%;border:3px solid #27335f}.vis-char .hair{position:absolute;left:11px;top:-1px;width:32px;height:16px;background:#402d4f;border:3px solid #27335f;border-bottom:0;border-radius:18px 18px 8px 8px}.vis-char .body{position:absolute;left:11px;top:28px;width:32px;height:34px;background:#ef7e65;border:3px solid #27335f;border-radius:10px}.vis-char .leg{position:absolute;top:62px;width:8px;height:24px;background:#27335f;border-radius:6px}.vis-char .leg.l1{left:16px}.vis-char .leg.l2{left:30px}.vis-char .arm{position:absolute;top:35px;width:7px;height:20px;background:#27335f;border-radius:5px}.vis-char .arm.a1{left:5px;transform:rotate(18deg)}.vis-char .arm.a2{right:5px;transform:rotate(-18deg)}
+.cubes,.planks,.dots,.stepsVisual,.boxesVisual,.barsVisual{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.cube{width:28px;height:28px;background:linear-gradient(145deg,#d8e1ff,#93a8e8);border:2px solid #33467f;border-radius:7px;box-shadow:0 3px 0 #6177bc}
+.plank{width:38px;height:16px;background:linear-gradient(180deg,#b87b4f,#8e5a37);border:2px solid #5c3b23;border-radius:5px;box-shadow:0 3px 0 #4a2d1b}
+.dot{width:18px;height:18px;border-radius:50%;background:#ffe287;border:2px solid #aa7727;box-shadow:0 3px 0 #7d5a1f}
+.stepBox{width:34px;background:linear-gradient(180deg,#b1bddf,#8d98b7);border:2px solid #4a5677;border-radius:8px 8px 0 0;box-shadow:0 3px 0 #596483}
+.packet{width:74px;height:46px;background:linear-gradient(180deg,#f5f7ff,#d8e2ff);border:2px solid #41559a;border-radius:12px;padding:6px;display:grid;place-items:center;color:#23346d;font-weight:900;box-shadow:0 4px 0 #7d91d3}
+.bar{height:20px;background:linear-gradient(90deg,#91ead8,#63cfba);border:2px solid #237666;border-radius:999px;box-shadow:0 3px 0 #175448}
+.energyWrap{display:grid;gap:10px}.energyLine{display:grid;grid-template-columns:110px 1fr auto;gap:10px;align-items:center;color:#fff;font-weight:900}
+.panel::-webkit-scrollbar{width:12px}.panel::-webkit-scrollbar-thumb{background:#40589d;border-radius:999px;border:3px solid #111935}
+@media(max-width:920px){.grid2{grid-template-columns:1fr}.scratchPaper{height:260px}.visualStage{min-height:190px}}
+@media(max-width:620px){body{padding:6px}.shell{border-radius:18px}.hud{left:8px;right:8px;top:8px}.pill{padding:7px 10px;border-radius:14px}.hintBar{bottom:6px;padding:8px 10px;font-size:13px}.touch button{min-width:64px;height:54px}.keypad{grid-template-columns:repeat(4,minmax(0,1fr))}.keypad .wide{grid-column:span 2}}
+
+/* 2026 adaptation: responsive viewport + mobile play + compact learning tools */
+h1{color:#f5f4ff}
+html{min-height:100%;scroll-behavior:smooth} body{min-height:100%;overscroll-behavior-y:auto}
+#app{position:relative} header .brand{min-width:0} .badges{align-items:center}
+#fullscreenBtn{display:inline-flex;align-items:center;gap:8px;background:#79dcc7;color:#132942;border:2px solid #204c65;border-radius:999px;padding:10px 14px;font-weight:900;font-size:14px;box-shadow:0 4px 0 #1d6670;white-space:nowrap}
+#fullscreenBtn .fsIcon{font-size:22px;line-height:.9} #fullscreenBtn:active{transform:translateY(2px)}
+.shell{height: min(720px, 56.25vw);min-height:0;aspect-ratio:auto;touch-action:pan-y}
+#game{width:100%;height:100%;aspect-ratio:auto;touch-action:none;}
+.controls{position:relative;align-items:center;min-height:70px}
+.touch{user-select:none;-webkit-user-select:none;touch-action:none;align-items:center}
+.touch button{-webkit-tap-highlight-color:transparent;touch-action:none;min-width:84px;min-height:64px;user-select:none}
+.touch .jump{min-width:138px}
+#modal{touch-action:pan-y} #panel{overscroll-behavior:contain;scrollbar-width:auto;scrollbar-color:#8198e8 #121b3b;position:relative}
+#panel::-webkit-scrollbar{width:13px} #panel::-webkit-scrollbar-thumb{background:#7890dd;border:3px solid #141d3e;border-radius:9px}
+.scrollNotice{position:absolute;left:50%;bottom:14px;z-index:8;transform:translateX(-50%);pointer-events:none;padding:9px 16px;border-radius:999px;background:#f9d66e;color:#182047;font-weight:900;font-size:14px;box-shadow:0 5px 20px #0008;border:2px solid #d29f31;text-align:center;white-space:nowrap;max-width:94%}
+.scrollNotice[hidden],.pageScrollNotice[hidden]{display:none!important}
+.pageScrollNotice{position:fixed;z-index:30;left:50%;transform:translateX(-50%);bottom:10px;background:#ffe28c;color:#172245;border:2px solid #b98922;border-radius:99px;box-shadow:0 5px 18px #0009;font-size:14px;font-weight:900;padding:10px 18px;pointer-events:none}
+.challengeIntro p{font-size:clamp(15px,1.6vw,18px)}
+.challengeLayout{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.9fr);gap:16px;align-items:start}
+.challengeLayout .visualStage{min-height:180px}
+.solver{background:#141e42;border:2px solid #334984;border-radius:22px;padding:14px}
+.challengeTools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:13px 0 6px}
+.challengeTools button{background:#283969;border:2px solid #4d65ac;border-radius:12px;color:#f0f4ff;box-shadow:none;padding:10px 5px;min-height:52px;font-size:clamp(12px,1.2vw,15px);white-space:normal}
+.challengeTools button[aria-pressed="true"]{background:#ffe18d;color:#1b2c59;border-color:#d5a440}
+.toolDrawer{display:none;padding:12px;background:#0d1737;border:2px solid #405592;border-radius:15px;margin-top:8px;color:#eaf0ff;font-size:15px;line-height:1.45}
+.toolDrawer.show{display:block}
+.toolDrawer .steps{display:block}
+.keypad{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0}
+.keypad button{min-height:54px;padding:10px 4px;font-size:clamp(20px,2.25vw,28px)}
+.keypad .checkKey{background:linear-gradient(180deg,#84eed3,#55c8b1);color:#12382e;border-color:#2e8072;box-shadow:0 4px 0 #256f60;font-size:29px}
+.keypad .specialKey{background:#ffe6a8;color:#392b13;border-color:#a27a2f}
+.answerRow input{width:100%;min-width:0;font-size:clamp(22px,2.3vw,28px)}
+.scratchWrap{margin-top:2px} .scratchPaper{height:clamp(250px,36vh,480px)}
+.visualArea .card{padding:13px}.visualArea .card h3{font-size:19px}
+.panel{padding:clamp(12px,2vw,25px)}
+#app:fullscreen,#app.pseudo-fullscreen{position:fixed;inset:0;z-index:1000;max-width:none;width:100vw;height:100dvh;margin:0;padding:6px 10px;background:#0c1531;display:flex;flex-direction:column;overflow:hidden}
+#app:fullscreen header,#app.pseudo-fullscreen header{flex:0 0 auto;margin-bottom:4px}
+#app:fullscreen header .logo,#app.pseudo-fullscreen header .logo{width:37px;height:37px;border-radius:12px;font-size:22px}
+#app:fullscreen h1,#app.pseudo-fullscreen h1{font-size:clamp(19px,2.4vw,31px)}
+#app:fullscreen .sub,#app.pseudo-fullscreen .sub,#app:fullscreen .badges .badge,#app.pseudo-fullscreen .badges .badge{display:none}
+#app:fullscreen .shell,#app.pseudo-fullscreen .shell{flex:1 1 auto;min-height:0!important;height:auto!important}
+#app:fullscreen .controls,#app.pseudo-fullscreen .controls{margin-top:5px;min-height:0;flex:0 0 auto}
+#app:fullscreen .controls .text,#app.pseudo-fullscreen .controls .text,#app:fullscreen .footerLine,#app.pseudo-fullscreen .footerLine{display:none}
+#app:fullscreen .touch,#app.pseudo-fullscreen .touch{width:100%;justify-content:space-between}
+#app:fullscreen .touch button,#app.pseudo-fullscreen .touch button{min-height:52px;height:clamp(52px,8vh,82px);min-width:min(26vw,175px);font-size:clamp(22px,3.5vw,30px)}
+body.pseudo-mode{overflow:hidden}
+#app:fullscreen .panel,#app.pseudo-fullscreen .panel{max-height:100%;}
+@media(max-width:950px){
+ .challengeLayout{grid-template-columns:1fr}
+ .challengeVisual{order:2}
+ .solver{order:1}
+ .challengeVisual .card{padding:11px}
+ .visualArea .card{padding:10px}
+ #modal{padding:8px}
+ .panel{border-radius:18px;border-width:2px}
+ .visualStage{min-height:150px}
+}
+@media(max-width:600px){
+ body{padding:4px}
+ header{gap:6px;margin-bottom:6px}
+ .logo{width:38px;height:38px;font-size:22px;border-radius:12px}
+ h1{font-size:clamp(20px,5.1vw,28px);color:#f5f4ff!important}
+ .sub,.badge{display:none}
+ #fullscreenBtn{padding:8px 10px;font-size:13px}
+ .shell{border-radius:14px;border-width:2px}
+ .hud{gap:5px;top:5px;left:5px;right:5px}
+ .pill{min-width:0;flex:1;border-width:1px;border-radius:10px;padding:5px 6px;text-align:center}
+ .pill b{font-size:9px;line-height:1.1}
+ .pill span{font-size:clamp(12px,3vw,18px)}
+ .hintBar{font-size:clamp(11px,2.6vw,13px);padding:6px 8px;width:94%;bottom:5px}
+ .toast{bottom:53px;padding:8px 11px;font-size:13px}
+ .touch{width:100%;justify-content:space-between;gap:8px}
+ .touch button{flex:1;min-width:0;height:62px;font-size:24px}
+ .touch .jump{min-width:0;flex:1.5}
+ .controls .text{display:none}
+ .note,.footerLine{font-size:11px;margin-top:6px}
+ .panel h2{font-size:clamp(23px,6.1vw,32px);margin:6px 0}
+ .panel p{font-size:15px;margin:6px 0 10px}
+ .panel .eyebrow{font-size:11px;padding:5px 9px}
+ .challengeIntro p{font-size:14px}
+ .challengeLayout{gap:9px}
+ .solver{padding:10px}
+ .codeCard{padding:10px;box-shadow:0 4px 0 #9c7330}
+ .formula{font-size:clamp(21px,6vw,28px)}
+ .keypad button{min-height:56px;font-size:26px}
+ .challengeTools button{font-size:12px;min-height:48px;padding:6px 3px}
+ .answerRow input{padding:9px 10px;font-size:24px}
+ .scratchPaper{height:min(47dvh,390px)}
+ .pageScrollNotice{bottom:5px;font-size:12px;padding:6px 12px}
+ #app:fullscreen,#app.pseudo-fullscreen{padding:4px}
+ #app:fullscreen .touch button,#app.pseudo-fullscreen .touch button{height:clamp(49px,9dvh,72px)}
+}
+@media(max-height:480px) and (orientation:landscape){
+ #app header .sub,#app header .badge{display:none}
+ #app header .logo{width:32px;height:32px;font-size:19px}
+ #app h1{font-size:20px}
+ #app .controls{margin-top:4px}
+ #app .touch button{height:46px;min-height:46px}
+ #app .hintBar{font-size:11px;max-width:70%;left:50%}
+ #app .pill{padding:4px 7px}
+ #app .panel{padding:10px}
+ #app .modal{padding:5px}
+}
+
+/* Contextual mathematical scenes: one instance per challenge, available on demand. */
+.contextScene{border-radius:16px;background:#0c1736;border:1px solid #6881ca;overflow:hidden;margin-top:12px}
+.sceneHeading{background:#203560;color:#ffe3a0;padding:9px 12px;font:800 clamp(15px,1.55vw,20px) Fredoka,Nunito,sans-serif}
+.sceneIllustration{display:block;width:100%;height:auto;max-height:300px;object-fit:contain;background:#263967}
+.sceneCaption{background:#e5edfb;color:#203059;padding:12px 14px;font-size:clamp(13px,1.2vw,16px);line-height:1.45;font-weight:800}
+.sceneCaption strong{color:#104f6b}.sceneCaption .sceneOverflow{color:#a23636}
+@media(max-width:600px){.sceneIllustration{max-height:none}.sceneCaption{padding:10px;font-size:13px}}
+
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand">
+      <div class="logo">🏰</div>
+      <div>
+        <h1>O código do Carbedo</h1>
+        <div class="sub">Aventura ampliada · máis acción, máis potencias e máis guía visual</div>
+      </div>
+    </div>
+    <div class="badges">
+      <button id="fullscreenBtn" type="button" title="Xogar a pantalla completa"><span class="fsIcon">⛶</span><span id="fullscreenText">Pantalla completa</span></button>
+      <span class="badge">6.º Primaria</span>
+      <span class="badge">Potencias</span>
+      <span class="badge">Courel</span>
+    </div>
+  </header>
+
+  <div class="shell">
+    <canvas id="game" width="1280" height="720" aria-label="Videoxogo de plataformas ambientado no Carbedo"></canvas>
+    <div class="hud">
+      <div class="pill"><b>Zona</b><span id="zone">Saída da casa</span></div>
+      <div class="pill"><b>Progreso</b><span id="progress">0 / 8</span></div>
+      <div class="pill"><b>Vidas</b><span id="lives">❤❤❤</span></div>
+    </div>
+    <div class="hintBar" id="hintBar">Saes da túa casa. Avanza cara ao Carbedo e repara os puntos de código polo camiño.</div>
+    <div class="toast" id="toast"></div>
+    <div class="modal show" id="modal"><div class="panel" id="panel"></div><div class="scrollNotice" id="scrollNotice" hidden>↓ Hai máis contido · desliza cara arriba</div></div>
+  </div>
+
+  <div class="controls">
+    <div class="text">
+      <b>Controis</b> · ⬅ / ➡ ou A / D para moverte · ↑ / W / Espazo para saltar · na pantalla, usa os botóns.<br>
+      <b>Consello</b> · As carrachas elimínanse <u>saltando enriba</u>. Se te tocan de lado, perdes unha vida e volves ao último punto seguro.
+    </div>
+    <div class="touch">
+      <button id="left">◀</button>
+      <button id="right">▶</button>
+      <button id="jump" class="jump">SALTAR</button>
+    </div>
+  </div>
+  <div class="footerLine">Prototipo ampliado para probas na aula · As ruínas do castelo aparecen como unha recreación de xogo inspirada no Carbedo.</div>
+</div>
+<div class="pageScrollNotice" id="pageScrollNotice" hidden>↓ Despraza para ver os controis</div>
+
+<script>
+(()=>{
+'use strict';
+const canvas=document.getElementById('game');
+const ctx=canvas.getContext('2d');
+const modal=document.getElementById('modal');
+const panel=document.getElementById('panel');
+const hintBar=document.getElementById('hintBar');
+const zoneLabel=document.getElementById('zone');
+const progressLabel=document.getElementById('progress');
+const livesLabel=document.getElementById('lives');
+const toast=document.getElementById('toast');
+const app=document.getElementById('app'); const shell=document.querySelector('.shell');
+const fullscreenBtn=document.getElementById('fullscreenBtn'); const fullscreenText=document.getElementById('fullscreenText');
+let W=1280, H=720, drawScale=1, cameraY=0; const WORLD_H=720, worldW=6200;
+const keys={left:false,right:false,jump:false};
+const player={x:120,y:420,w:34,h:52,vx:0,vy:0,onGround:false,respawnX:120,respawnY:420,lives:3,inv:0,dir:1};
+let camera=0, paused=true, activeChallenge=-1, frame=0, hintTimer=0, nearSign='';
+const solved=Array(8).fill(false);
+const zones=[
+  {x:0,name:'Saída da casa'}, {x:820,name:'Ribeira dos castiñeiros'}, {x:1650,name:'Costa do souto'}, {x:2500,name:'Refuxio da devesa'},
+  {x:3350,name:'Outeiro do sinal'}, {x:4300,name:'Lombo das antenas'}, {x:5200,name:'Subida ao castelo'}
+];
+function sgn(v){return v<0?-1:1}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function overlaps(a,b){return a.x<a.x+a.w && a.x+b.w>b.x && a.y+b.h>b.y && a.y<a.y+a.h}
+function rectsOverlap(a,b){return a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y}
+function showToast(msg,ms=2300){toast.textContent=msg;toast.classList.add('show');toast.dataset.until=String(performance.now()+ms)}
+
+const platforms=[];
+function addPlatform(x,y,w,h,opts={}){platforms.push({x,y,w,h,color:opts.color||'grass', requires:opts.requires??null, deco:opts.deco||false})}
+function solidPlatforms(){return platforms.filter(p=>p.requires===null || solved[p.requires])}
+
+// Base world and action platforms
+addPlatform(0,560,760,180);
+addPlatform(860,600,240,120,{deco:true,color:'earth'}); // lower river bank
+addPlatform(1100,560,360,180);
+addPlatform(1460,560,250,180);
+addPlatform(1710,520,120,30); addPlatform(1820,480,120,30); addPlatform(1930,440,120,30); addPlatform(2040,400,120,30);
+addPlatform(2160,560,280,180);
+addPlatform(2520,560,250,180);
+addPlatform(2780,520,110,30); addPlatform(2890,480,110,30); addPlatform(3000,440,110,30); addPlatform(3110,400,110,30);
+addPlatform(3220,560,230,180);
+addPlatform(3450,600,230,140,{deco:true,color:'earth'});
+addPlatform(3680,560,310,180);
+addPlatform(3990,520,120,30); addPlatform(4100,480,120,30); addPlatform(4210,440,120,30); addPlatform(4320,400,120,30);
+addPlatform(4440,560,260,180);
+addPlatform(4760,520,120,30); addPlatform(4880,480,120,30); addPlatform(5000,440,120,30); addPlatform(5120,400,120,30); addPlatform(5240,360,120,30);
+addPlatform(5360,560,280,180);
+addPlatform(5640,510,120,28); addPlatform(5760,460,120,28); addPlatform(5880,410,120,28);
+addPlatform(6000,360,180,28);
+
+// Unlockable bridges / steps / supports
+addPlatform(760,520,110,24,{requires:0,color:'wood'});
+addPlatform(850,500,110,24,{requires:0,color:'wood'});
+addPlatform(940,480,120,24,{requires:0,color:'wood'});
+addPlatform(1600,520,110,28,{requires:1,color:'stone'});
+addPlatform(1710,480,110,28,{requires:1,color:'stone'});
+addPlatform(1820,440,110,28,{requires:1,color:'stone'});
+addPlatform(2310,500,90,24,{requires:2,color:'wood'}); addPlatform(2395,470,90,24,{requires:2,color:'wood'});
+addPlatform(2660,500,120,24,{requires:3,color:'stone'}); addPlatform(2780,470,120,24,{requires:3,color:'stone'}); addPlatform(2900,440,120,24,{requires:3,color:'stone'});
+addPlatform(3350,480,90,24,{requires:4,color:'metal'}); addPlatform(3440,450,90,24,{requires:4,color:'metal'}); addPlatform(3530,420,90,24,{requires:4,color:'metal'});
+addPlatform(4560,500,90,24,{requires:5,color:'wood'}); addPlatform(4650,470,90,24,{requires:5,color:'wood'}); addPlatform(4740,440,90,24,{requires:5,color:'wood'});
+addPlatform(5460,520,100,24,{requires:6,color:'stone'}); addPlatform(5560,480,100,24,{requires:6,color:'stone'}); addPlatform(5660,440,100,24,{requires:6,color:'stone'});
+addPlatform(6010,330,170,24,{requires:7,color:'stone'});
+
+const signs=[
+  {x:250,text:'Pulsa salto para subir ás primeiras plataformas.'},
+  {x:1360,text:'Atención: as carrachas morren se lles saltas enriba.'},
+  {x:3300,text:'As potencias difíciles podes resolvelas no caderno.'},
+  {x:5360,text:'Último tramo. Repara a baliza e sobe ás ruínas.'}
+];
+
+const challenges=[
+  {
+    x:620,y:500,zone:'Saída da casa',title:'As lousas da saída',topic:'Potencia simple',
+    story:'O primeiro paso mecánico só se abre se calculas cantas lousas coloca o sistema: 2³. Precisas ese número para saír cara ao monte.',
+    prompt:'2³ = ?', answer:8,
+    why:'Aquí a potencia indica repetición rápida: 2·2·2. Úsase para contar pequenos conxuntos iguais sen facelo a man un por un.',
+    hints:['Lembra: 2³ significa 2·2·2.','Primeiro 2·2 = 4. Logo 4·2 = 8.','O sistema colocará 8 lousas.'],
+    steps:['A base é 2 e o expoñente é 3.','Multiplica 2 por si mesmo 3 veces: 2·2·2.','O resultado é 8.'], visual:'stones', unlockText:'Aparece unha primeira ponte de madeira sobre o regato.'
+  },
+  {
+    x:1520,y:500,zone:'Ribeira dos castiñeiros',title:'As escaleiras do souto',topic:'Potencia simple',
+    story:'Unha costa chea de follas precisa 3² chanzos automáticos para que a suba sexa segura. Cantos chanzos saen?',
+    prompt:'3² = ?', answer:9,
+    why:'Un cadrado de lado 3 ten 3×3 pezas. Por iso 3² axuda a ver superficies e repeticións en forma cadrada.',
+    hints:['3² significa 3·3.','Un cadrado de 3 por 3 ten 9 cadradiños.','Polo tanto, soben 9 chanzos.'],
+    steps:['Escribe 3² como 3·3.','Multiplica 3×3.','O resultado final é 9.'], visual:'stairs', unlockText:'Actívanse os chanzos de pedra da costa.'
+  },
+  {
+    x:2220,y:540,zone:'Costa do souto',title:'A ponte dos castiñeiros',topic:'Produto de potencias da mesma base',
+    story:'A ponte grande ten 2³ módulos e cada módulo precisa 2² táboas. Cantas táboas hai en total?',
+    prompt:'2³ · 2² = ?', answer:32,
+    why:'Ao multiplicar potencias da mesma base, súmanse expoñentes. É unha forma rápida de contar estruturas repetidas en grupos.',
+    hints:['As dúas potencias teñen base 2.','Suma os expoñentes: 3 + 2 = 5.','Entón 2³·2² = 2⁵ = 32.'],
+    steps:['Observa que a base é a mesma: 2.','Suma os expoñentes: 3+2 = 5.','Calcula 2⁵ = 32.'], visual:'bridge', unlockText:'A ponte longa queda completa e xa podes cruzar o barranco.'
+  },
+  {
+    x:3180,y:380,zone:'Refuxio da devesa',title:'As caixas do refuxio',topic:'Cociente de potencias da mesma base',
+    story:'No refuxio hai 5⁴ pilas para repartir en 5² caixas iguais. Cantas pilas quedan en cada caixa?',
+    prompt:'5⁴ ÷ 5² = ?', answer:25,
+    why:'Ao dividir potencias da mesma base, réstanse os expoñentes. Isto axuda a repartir grandes cantidades en lotes iguais.',
+    hints:['A base é 5 nas dúas potencias.','Resta os expoñentes: 4 − 2 = 2.','Entón 5² = 25.'],
+    steps:['Escribe 5⁴ ÷ 5² como 5^(4−2).','4−2 = 2.','Calcula 5² = 25.'], visual:'boxes', unlockText:'Ordénanse as caixas e móvese a pasarela do refuxio.'
+  },
+  {
+    x:3660,y:540,zone:'Refuxio da devesa',title:'A torre da auga',topic:'Potencia dunha potencia',
+    story:'A torre pequena ten de lado 2³ unidades e cómpre calcular cantos bloques aparecen se esa medida se eleva ao cadrado para formar a base: (2³)².',
+    prompt:'(2³)² = ?', answer:64,
+    why:'Cando unha potencia se eleva a outra, multiplícanse os expoñentes. Serve para simplificar medidas repetidas en varios niveis.',
+    hints:['Nunha potencia doutra potencia, multiplícanse os expoñentes.','3 × 2 = 6.','(2³)² = 2⁶ = 64.'],
+    steps:['Aplica a regra: (a^m)^n = a^(m·n).','Multiplica 3·2 = 6.','Calcula 2⁶ = 64.'], visual:'tower', unlockText:'A torre reparada verte auga e aparece un tramo metálico.'
+  },
+  {
+    x:4460,y:540,zone:'Outeiro do sinal',title:'O repetidor do val',topic:'Potencias de 10',
+    story:'O repetidor manexa 10⁵ pulsos, repartidos en 10² paquetes iguais. Cantos pulsos leva cada paquete?',
+    prompt:'10⁵ ÷ 10² = ?', answer:1000,
+    why:'As potencias de 10 fan máis doado traballar con cantidades enormes, como datos, pulsos, medidas e capacidades.',
+    hints:['Ao dividir, resta os expoñentes.','5 − 2 = 3.','10³ = 1000.'],
+    steps:['Escribe 10⁵ ÷ 10² como 10^(5−2).','5−2 = 3.','10³ = 1000.'], visual:'signal', unlockText:'O repetidor acéndese e a ruta de madeira cara á antena móvese.'
+  },
+  {
+    x:5340,y:340,zone:'Lombo das antenas',title:'O muro da rocha',topic:'Potencia para volume e bloques',
+    story:'Para reforzar un muro cúbico fan falta 4³ bloques de pedra. Cantos bloques son?',
+    prompt:'4³ = ?', answer:64,
+    why:'As potencias tamén aparecen ao calcular volumes de cubos e ao contar bloques organizados en 3 dimensións.',
+    hints:['4³ significa 4·4·4.','4·4 = 16. Despois 16·4 = 64.','Fanse 64 bloques.'],
+    steps:['Converte 4³ en 4·4·4.','Multiplica 4×4 = 16.','Multiplica 16×4 = 64.'], visual:'blocks', unlockText:'Aparecen bloques de pedra na última subida.'
+  },
+  {
+    x:5900,y:390,zone:'Subida ao castelo',title:'A luz das ruínas',topic:'Operacións combinadas con potencias',
+    story:'A baliza final precisa a diferenza entre 5²·2³ e 3⁴. Se acertas, iluminarás as ruínas do Carbedo.',
+    prompt:'5² · 2³ − 3⁴ = ?', answer:119,
+    why:'Nun mesmo problema as potencias poden combinarse con produtos e restas. As matemáticas non están separadas: colaboran entre si para controlar sistemas reais.',
+    hints:['Primeiro resolve 5², 2³ e 3⁴.','Despois multiplica 25×8 e resta 81.','200−81 = 119.'],
+    steps:['5² = 25, 2³ = 8 e 3⁴ = 81.','25×8 = 200.','200−81 = 119.'], visual:'beacon', unlockText:'A baliza queda acesa e unha escalinata final leva ata o castelo.'
+  }
+];
+
+const challengeMap = Object.fromEntries(challenges.map((c,i)=>[c.x,i]));
+const terminals=challenges.map((c,i)=>({x:c.x,y:c.y,w:44,h:60,id:i}));
+
+const enemies=[
+  {x:1220,y:528,w:34,h:20,left:1170,right:1390,vx:1.15,dead:false},
+  {x:1760,y:488,w:34,h:20,left:1715,right:1810,vx:1.05,dead:false},
+  {x:1970,y:408,w:34,h:20,left:1940,right:2050,vx:1.2,dead:false},
+  {x:2460,y:528,w:34,h:20,left:2190,right:2480,vx:1.25,dead:false},
+  {x:3040,y:408,w:34,h:20,left:3010,right:3110,vx:1.05,dead:false},
+  {x:3810,y:528,w:34,h:20,left:3700,right:3950,vx:1.3,dead:false},
+  {x:4250,y:408,w:34,h:20,left:4215,right:4325,vx:1.05,dead:false},
+  {x:4680,y:528,w:34,h:20,left:4460,right:4690,vx:1.25,dead:false},
+  {x:5165,y:388,w:34,h:20,left:5125,right:5230,vx:1.1,dead:false},
+  {x:5800,y:438,w:34,h:20,left:5765,right:5885,vx:1.18,dead:false}
+];
+
+function launchIntro(){
+  paused=true;
+  panel.innerHTML=`
+    <div class="eyebrow">🏰 Aventura nova no Carbedo</div>
+    <h2>Máis camiño. Máis acción. Máis matemáticas.</h2>
+    <p>Vives nunha casa próxima ao castelo do Carbedo. Un antigo sistema de defensa volveu activarse e o monte aparece cheo de puntos de código sen rematar. Para chegar ás ruínas terás que <b>saltar, subir, baixar, evitar carrachas e reparar 8 desafíos de potencias</b>.</p>
+    <div class="stats">
+      <span>8 reparacións graduais</span>
+      <span>Carrachas inimigas</span>
+      <span>Caderno táctil para facer as contas</span>
+      <span>Escenas propias de cada problema</span>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>Que atoparás?</h3>
+        <p>Unha ponte rota, costas con chanzos, un refuxio, antenas, balizas e a subida final ao castelo. Cada cálculo arranxa algo no escenario.</p>
+        <div class="hintBox">⚠️ <b>Atención ás carrachas:</b> se lles saltas enriba, elimínasas. Se che tocan de lado, perdes unha vida.</div>
+      </div>
+      <div class="card">
+        <h3>Como xogar?</h3>
+        <p>Avanza ata as terminais douradas. O xogo deterase e poderás resolver o desafío cun <b>caderno cuadriculado</b> e <b>pistas paso a paso</b>.</p>
+        <div class="actions"><button class="btnMain" id="startGame">Comezar a aventura →</button></div>
+      </div>
+    </div>`;
+  modal.classList.add('show');
+  requestAnimationFrame(updateScrollIndicators);
+  document.getElementById('startGame').onclick=()=>{modal.classList.remove('show');paused=false;showToast('Primeiro obxectivo: chega á primeira terminal.');};
+}
+
+function renderVisual(problem,val){
+  // Each scene depicts the quantities and objects in the actual question.
+  // Candidate-controlled colouring is a preview, not an automatic correctness check.
+  const attempt=Number.isSafeInteger(val) && val>=0?Math.min(val,999999999):null;
+  const count=(max)=>attempt===null?0:Math.min(attempt,max);
+  const fillAt=(n)=>attempt!==null && n<attempt;
+  const edge='#26365c', ink='#142b50';
+  const slate=(x,y,w,h,active)=>`<rect x="${x}" y="${y+4}" width="${w}" height="${h}" rx="4" fill="#203250"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${active?'#ffd27b':'#b8cce0'}" stroke="${edge}" stroke-width="2"/>`;
+  const label=(x,y,t,size=15,color='#f8f4df',anchor='middle')=>`<text x="${x}" y="${y}" text-anchor="${anchor}" fill="${color}" font-family="Nunito,Arial,sans-serif" font-size="${size}" font-weight="900">${t}</text>`;
+  const cloud=(x,y,s=1)=>`<g transform="translate(${x} ${y}) scale(${s})" fill="#b4c3df"><ellipse rx="45" ry="13"/><circle cx="-20" cy="-8" r="15"/><circle cx="15" cy="-11" r="20"/></g>`;
+  const scene=(inner)=>`<svg class="sceneIllustration" viewBox="0 0 560 275" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${problem.title}"><defs><linearGradient id="scSky" x2="0" y2="1"><stop stop-color="#253967"/><stop offset="1" stop-color="#5e86a3"/></linearGradient><linearGradient id="scGrass" x2="0" y2="1"><stop stop-color="#89b976"/><stop offset="1" stop-color="#4a7555"/></linearGradient></defs><rect width="560" height="275" fill="url(#scSky)"/><path d="M0 166L78 75 170 171 268 82 369 167 470 74 560 169V275H0Z" fill="#74969a" opacity=".62"/><path d="M0 207L88 169 155 205 282 159 375 206 470 161 560 197V275H0Z" fill="#385f6b" opacity=".8"/>${cloud(89,42,.6)}${inner}</svg>`;
+  let art='',caption='',heading='';
+  if(problem.visual==='stones'){
+    heading='O paso de lousas do regato';
+    const stones=Array.from({length:8},(_,j)=>{
+      const x=88+j*50,y=168+(j%2?15:-7);
+      return `<g><path d="M${x-4} ${y+11}l47-5 13 33-51 9Z" fill="#213e56" opacity=".65"/><path d="M${x} ${y}l36-4 9 29-40 7-8-15Z" fill="${fillAt(j)?'#ffe4a0':'#bac9d7'}" stroke="#31435b" stroke-width="3"/><path d="M${x+5} ${y+8}l23-3" stroke="${fillAt(j)?'#fff4d6':'#e8f0f7'}" stroke-width="3"/></g>`;
+    }).join('');
+    art=scene(`<path d="M0 182Q155 149 276 189T560 188V275H0Z" fill="#498fb3"/><path d="M0 172Q42 152 70 179L75 275H0Z" fill="#6b965e"/><path d="M498 184q26-26 62-9V275h-62Z" fill="#729d61"/><path d="M0 236Q280 228 560 236" stroke="#9ad8e4" stroke-width="5" fill="none" opacity=".7"/>${stones}<path d="M0 168l70 6M492 183l68-9" stroke="#496845" stroke-width="9"/><g fill="#476843"><circle cx="41" cy="146" r="22"/><circle cx="524" cy="157" r="24"/></g>${label(280,40,'2 × 2 × 2 lousas',20)}`);
+    caption='O regato necesita un camiño de pedras. A potencia 2³ indica cantas lousas debe colocar o mecanismo; a túa proposta ilumina as que quedarían instaladas.';
+  }else if(problem.visual==='stairs'){
+    heading='Nove chanzos na costa do souto';
+    art=scene(`<path d="M0 262L560 78V275H0Z" fill="#567748" stroke="#2c523e" stroke-width="5"/>${Array.from({length:9},(_,j)=>{const x=95+j*42,y=228-j*16;return `<g>${slate(x,y,40,26,fillAt(j))}${label(x+20,y+18,String(j+1),13,ink)}</g>`}).join('')}${label(283,36,'3 × 3 espazos na escaleira',17)}`);
+    caption='Cada chanzo ocupa un dos espazos da escaleira. A potencia 3² conta as posicións dunha disposición de 3 por 3.';
+  }else if(problem.visual==='bridge'){
+    heading='A ponte dos castiñeiros: 8 módulos';
+    const slat=(x,y,active)=>`<rect x="${x}" y="${y}" width="26" height="18" rx="3" fill="${active?'#eab66d':'#7f8c9a'}" stroke="#68492f" stroke-width="2"/><path d="M${x+5} ${y+7}h14" stroke="${active?'#f8dca7':'#c0cad0'}" stroke-width="2"/>`;
+    art=scene(`<path d="M0 197Q130 167 275 195T560 191V275H0Z" fill="#4389b1"/><path d="M0 166H44V275H0Z M516 174H560V275H516Z" fill="#668b59"/>${Array.from({length:8},(_,j)=>{const x=26+j*64;return `<g><rect x="${x-3}" y="127" width="61" height="85" rx="6" fill="#6a4830" stroke="#f9d898" stroke-width="2"/>${[0,1,2,3].map(k=>slat(x+3+(k%2)*28,139+Math.floor(k/2)*25,fillAt(j*4+k))).join('')}<rect x="${x-1}" y="119" width="58" height="7" rx="3" fill="#b98451"/>${label(x+26,112,String(j+1),14)}</g>`}).join('')}<path d="M20 91H537M22 90V130M537 90V130" stroke="#bd8958" stroke-width="7" fill="none"/><path d="M22 91L42 118M536 91l-20 27" stroke="#e1b57c" stroke-width="3"/>${label(280,38,'8 módulos · 4 táboas por módulo',18)}`);
+    caption='A ponte ten oito tramos unidos sobre a auga; en cada tramo hai catro lugares para táboas de madeira. A túa proposta marca cantas táboas se montarían.';
+  }else if(problem.visual==='boxes'){
+    const v=attempt??0;
+    art=scene(`<rect x="45" y="50" width="303" height="200" rx="14" fill="#20334d" stroke="#e4cc94" stroke-width="3"/>${Array.from({length:25},(_,j)=>{let x=63+j%5*55,y=65+Math.floor(j/5)*35;return `<g><rect x="${x}" y="${y}" width="46" height="28" rx="4" fill="#bd874d" stroke="#583c2a" stroke-width="2"/><path d="M${x+5} ${y+8}h36" stroke="#fbe6b8" stroke-width="2"/></g>`}).join('')}<path d="M350 150H387" stroke="#ffdd93" stroke-width="5" stroke-linecap="round"/><path d="m377 140 11 10-11 10" fill="none" stroke="#ffdd93" stroke-width="5"/><rect x="395" y="93" width="144" height="127" rx="17" fill="#e5bd79" stroke="#543922" stroke-width="5"/>${label(467,121,'UNHA CAIXA',14,ink)}${label(467,174,attempt===null?'?':String(v),42,ink)}${label(467,198,'pilas / caixa',13,ink)}${label(190,38,'5 × 5 = 25 caixas',16)}`);
+    caption=attempt===null?'Hai 625 pilas para repartir por igual en 25 caixas. Cantas pilas van en cada unha?':`Coa túa proposta, 25 caixas × ${v} pilas = ${(25*v).toLocaleString('es-ES')} pilas repartidas (hai 625 dispoñibles).`;
+  }else if(problem.visual==='tower'){
+    heading='A base da torre de auga';
+    art=scene(`<path d="M0 244L560 236V275H0Z" fill="url(#scGrass)"/><g transform="translate(340 48)"><path d="M65 96V6M5 99l60-36 63 36" fill="none" stroke="#1b3753" stroke-width="9"/><rect x="19" y="40" width="97" height="40" rx="10" fill="#78c2cc" stroke="#294d69" stroke-width="5"/><path d="M35 82L22 182M103 82l14 100" stroke="#294d69" stroke-width="10"/></g><rect x="25" y="35" width="284" height="210" rx="12" fill="#203650" stroke="#e1cda2" stroke-width="3"/>${Array.from({length:64},(_,j)=>slate(40+(j%8)*31.5,52+Math.floor(j/8)*23,27,18,fillAt(j))).join('')}${label(168,25,'Lado 2³ = 8 unidades',16)}`);
+    caption='A base da torre é un cadrado de lado 8. Hai 8 filas de 8 bloques: a túa proposta acende os lugares que se ocuparían.';
+  }else if(problem.visual==='signal'){
+    const v=attempt??0;
+    const radio=`<g transform="translate(422 26)" stroke="#e5efff" stroke-width="5" fill="none"><path d="M43 41v41m-26-27 26 17 26-17M19 84h48M15 15a40 40 0 0 0 56 0"/><circle cx="43" cy="22" r="9" fill="#ffe4a0" stroke="#263e59"/></g>`;
+    art=scene(`${radio}<rect x="31" y="48" width="308" height="194" rx="13" fill="#182e4f" stroke="#a6c6e4" stroke-width="3"/>${Array.from({length:100},(_,j)=>{let x=45+j%10*28.5,y=61+Math.floor(j/10)*17;return `<rect x="${x}" y="${y}" width="18" height="10" rx="3" fill="#7dd9c3"/>`}).join('')}<path d="M340 151h42" stroke="#ffda8d" stroke-width="5"/><path d="m372 141 12 10-12 10" fill="none" stroke="#ffda8d" stroke-width="5"/><rect x="397" y="112" width="142" height="124" rx="14" fill="#d1def1" stroke="#304e80" stroke-width="5"/>${label(468,139,'1 PAQUETE',15,ink)}${label(468,186,attempt===null?'?':String(v),32,ink)}${label(468,211,'pulsos',15,ink)}${label(185,31,'10² = 100 paquetes',16)}`);
+    caption=attempt===null?'O repetidor envía 100 paquetes de sinais. En total ten 100.000 pulsos para repartilos entre eles.':`Se cada un dos 100 paquetes leva ${v} pulsos, transportarían ${(100*v).toLocaleString('es-ES')} pulsos dos 100.000 dispoñibles.`;
+  }else if(problem.visual==='blocks'){
+    heading='Muro de pedra: catro capas';
+    art=scene(`<rect x="18" y="29" width="525" height="224" rx="18" fill="#182d4a" stroke="#9bb1d2" stroke-width="2"/>${Array.from({length:4},(_,layer)=>{let lx=39+(layer%2)*250, ly=48+Math.floor(layer/2)*98; return `<g><rect x="${lx-8}" y="${ly-17}" width="235" height="96" rx="11" fill="#293e5e" stroke="#b4c5dd" stroke-width="2"/>${label(lx+103,ly-3,`Capa ${layer+1}`,14)}${Array.from({length:16},(_,k)=>slate(lx+(k%4)*54,ly+6+Math.floor(k/4)*15,44,12,fillAt(layer*16+k))).join('')}</g>`}).join('')}`);
+    caption='O cubo necesita 4 capas. Cada capa ten 4 filas de 4 bloques: así se representa 4³ sen ocultar ningunha peza.';
+  }else if(problem.visual==='beacon'){
+    const v=attempt??0;
+    const lampBrightness=attempt===null?.16:Math.min(1,Math.max(.12,v/119));
+    art=scene(`<rect x="15" y="49" width="180" height="175" rx="13" fill="#183352" stroke="#e8cf8e" stroke-width="3"/>${Array.from({length:25},(_,j)=>slate(29+(j%5)*32,62+Math.floor(j/5)*27,25,20,true)).join('')}${label(103,30,'5² placas',16)}${label(103,251,'Cada placa: 2³ unidades',13)}<path d="M204 143H235" stroke="#f8df9a" stroke-width="6"/><path d="m226 133 10 10-10 10" fill="none" stroke="#f8df9a" stroke-width="5"/><rect x="242" y="65" width="125" height="138" rx="12" fill="#dce7f3" stroke="#39567b" stroke-width="5"/>${label(303,98,'PRODUCEN',13,ink)}${label(303,136,'25 × 8',23,ink)}${label(303,172,'= 200',26,ink)}${label(303,224,'− 3⁴ (81)',17)}<path d="M371 143H395" stroke="#f8df9a" stroke-width="5"/><circle cx="470" cy="136" r="${25+lampBrightness*22}" fill="#fff0aa" opacity="${lampBrightness}"/><path d="M450 122l20-70 20 70M452 142h36M450 155h40" stroke="#35405a" stroke-width="8" fill="none"/><rect x="437" y="170" width="67" height="54" rx="8" fill="#384563" stroke="#c5d4f3" stroke-width="3"/>${label(470,204,attempt===null?'?':String(v),24)}`);
+    caption=attempt===null?'Primeiro 25 placas producen 8 unidades cada unha; despois réstanse as 81 unidades que gasta o sistema.':`Co teu código a luz recibiría ${v} unidades. O seu brillo é unha simulación da enerxía proposta.`;
+  }
+  const prefix=attempt===null?'Introduce unha resposta para probar o mecanismo.':`A túa proposta: ${attempt.toLocaleString('es-ES')}.`;
+  const capacity={stones:8,stairs:9,bridge:32,tower:64,blocks:64}[problem.visual];
+  const overflow=attempt!==null&&capacity!==undefined&&attempt>capacity?` <strong class="sceneOverflow">O debuxo só ten ${capacity} lugares: co teu número sobrarían ${attempt-capacity} pezas.</strong>`:'';
+  return `<div class="contextScene"><div class="sceneHeading">${heading||problem.title}</div>${art}<div class="sceneCaption"><strong>${prefix}</strong> ${caption}${overflow}</div></div>`;
+}
+
+function openChallenge(i){
+  activeChallenge=i; paused=true; keys.left=keys.right=keys.jump=false; modal.classList.add('show');
+  const p=challenges[i];
+  let hintLevel=0, openTool=null, scratchStarted=false;
+  panel.innerHTML=`
+    <div class="challengeIntro">
+      <div class="eyebrow">Reparación ${i+1} / 8 · ${p.topic}</div>
+      <h2>${p.title}</h2>
+      <p>${p.story}</p>
+    </div>
+    <div class="challengeLayout">
+      <div class="challengeVisual">
+        <div class="card">
+          <h3>O código que falta</h3>
+          <div class="codeCard"><div class="label">Reparación ${i+1}</div><div class="formula">${p.prompt}</div></div>
+          <div class="badgeRow" style="margin-top:12px"><span class="microBadge">${p.zone}</span></div>
+        </div>
+      </div>
+      <div class="solver">
+        <h3 style="margin:0 0 6px;font:800 20px Fredoka;color:#fff">Completa a reparación</h3>
+        <div class="answerRow"><input id="ansInput" type="text" inputmode="none" autocomplete="off" spellcheck="false" pattern="[0-9]*" placeholder="O teu número" aria-label="Resposta do problema"></div>
+        <div class="keypad" aria-label="Teclado numérico convencional">
+          ${['7','8','9','4','5','6','1','2','3','⌫','0','OK'].map(k=>`<button type="button" class="${k==='OK'?'checkKey':k==='⌫'?'specialKey':''}" data-key="${k}" aria-label="${k==='OK'?'Comprobar resultado':k==='⌫'?'Borrar último díxito':k}">${k}</button>`).join('')}
+        </div>
+        <div class="challengeTools" role="group" aria-label="Ferramentas de axuda">
+          <button type="button" data-tool="hint" aria-pressed="false">💡 Pista</button>
+          <button type="button" data-tool="steps" aria-pressed="false">🧭 Guía</button>
+          <button type="button" data-tool="scratch" aria-pressed="false">✏️ Caderno</button>
+          <button type="button" data-tool="visual" aria-pressed="false">🖼️ Escena</button>
+        </div>
+        <div id="toolDrawer" class="toolDrawer" aria-live="polite"></div>
+        <div class="feedback" id="feedback" aria-live="polite"></div>
+        <div class="mini">Preme <b>OK</b> para comprobar. Usa as iconas para abrir axudas.</div>
+      </div>
+    </div>`;
+  const input=document.getElementById('ansInput');
+  const feedback=document.getElementById('feedback');
+  const toolDrawer=document.getElementById('toolDrawer');
+  // The illustration exists in one place only: the optional Scene tool.
+  function refreshVisual(){
+    const mount=document.getElementById('extraVisual');
+    if(mount){const v=input.value.trim()===''?NaN:Number(input.value);mount.innerHTML=renderVisual(p,v);}
+  }
+  function refreshScroll(){requestAnimationFrame(updateScrollIndicators)}
+  function clearInput(){input.value='';refreshVisual()}
+  function check(){
+    const text=input.value.trim();
+    const v=Number(text);
+    if(!text){feedback.textContent='Introduce primeiro unha resposta.'; refreshScroll();return;}
+    if(v===p.answer){
+      solved[i]=true; progressLabel.textContent=`${solved.filter(Boolean).length} / 8`;
+      player.respawnX=p.x+70; player.respawnY=Math.max(120,p.y-20); activeChallenge=-1;
+      panel.innerHTML=`<div class="eyebrow">✅ Reparación completada</div><h2>${p.title} arranxada!</h2><p><b>${p.answer}</b> era o valor correcto. ${p.unlockText}</p><div class="hintBox">${p.why}</div><div class="actions"><button class="btnMain" id="resumeBtn">Volver ao camiño →</button></div>`;
+      panel.scrollTop=0; refreshScroll();
+      document.getElementById('resumeBtn').onclick=()=>{modal.classList.remove('show');paused=false;showToast(p.unlockText); hintBar.textContent='Segue cara á seguinte terminal. Cada vez haberá máis acción e máis potencias.';};
+    }else{
+      feedback.textContent='Aínda non funciona. Revisa os expoñentes e abre unha pista ou o caderno.';
+      input.select(); refreshScroll();
+    }
+  }
+  document.querySelectorAll('[data-key]').forEach(btn=>btn.onclick=()=>{
+    const k=btn.dataset.key;
+    if(k==='OK'){check();return;}
+    if(k==='⌫') input.value=input.value.slice(0,-1);
+    else if(input.value.length<9) input.value+=k;
+    refreshVisual();input.focus({preventScroll:true});
+  });
+  input.addEventListener('input',()=>{input.value=input.value.replace(/[^0-9]/g,'').slice(0,9);refreshVisual()});
+  input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();check();}});
+  document.querySelectorAll('[data-tool]').forEach(btn=>btn.onclick=()=>{
+    const tool=btn.dataset.tool;
+    if(tool==='hint' && openTool==='hint'){
+      hintLevel=Math.min(hintLevel+1,p.hints.length-1);
+      toolDrawer.innerHTML=`<b>💡 Pista ${hintLevel+1}/${p.hints.length}</b><p>${p.hints[hintLevel]}</p><div class="mini">Preme de novo en «Pista» para ver a seguinte.</div>`;
+      refreshScroll();return;
+    }
+    const close=openTool===tool; openTool=close?null:tool;
+    document.querySelectorAll('[data-tool]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tool===openTool)));
+    toolDrawer.classList.toggle('show',!!openTool);
+    if(!openTool){toolDrawer.innerHTML='';refreshScroll();return;}
+    if(tool==='hint')toolDrawer.innerHTML=`<b>💡 Pista ${hintLevel+1}/${p.hints.length}</b><p>${p.hints[hintLevel]}</p><div class="mini">Preme de novo en «Pista» para ver a seguinte.</div>`;
+    if(tool==='steps')toolDrawer.innerHTML=`<b>🧭 Resolución guiada</b>${p.steps.map((t,j)=>`<div class="step"><b>Paso ${j+1}:</b> ${t}</div>`).join('')}<div class="step"><b>Para que serve?</b> ${p.why}</div>`;
+    if(tool==='scratch'){
+      toolDrawer.innerHTML=`<div class="scratchWrap"><div class="scratchHead"><span>✏️ Escribe co dedo</span><button type="button" class="btnGhost" id="eraseScratch" style="padding:8px 12px;font-size:14px">Borrar</button></div><div class="scratchPaper"><canvas id="scratch" aria-label="Caderno de contas táctil"></canvas></div></div>`;
+      scratchStarted=false;
+      requestAnimationFrame(()=>{setupScratch(); scratchStarted=true;document.getElementById('eraseScratch').onclick=clearScratch;refreshScroll()});
+    }
+    if(tool==='visual'){
+      toolDrawer.innerHTML=`<b>🖼️ A escena deste problema</b><p>Os obxectos e agrupamentos corresponden aos datos do enunciado. Proba un número para visualizar a túa proposta.</p><div id="extraVisual"></div>`;
+      const n=input.value.trim()?Number(input.value):NaN;
+      document.getElementById('extraVisual').innerHTML=renderVisual(p,n);
+    }
+    refreshScroll();
+  });
+  panel.scrollTop=0;
+  refreshScroll();
+}
+
+function openEnding(){
+  paused=true; modal.classList.add('show');
+  panel.innerHTML=`
+    <div class="eyebrow">🌟 Misión cumprida · Castelo do Carbedo</div>
+    <h2>Descubriches para que serven as matemáticas</h2>
+    <p>Chegaches ás ruínas do Carbedo tras saltar, subir, baixar, vencer carrachas e reparar o código do monte. As potencias non eran só contas: servían para <b>construír pontes, preparar escaleiras, repartir materiais, controlar sinais e acender unha baliza</b>.</p>
+    <div class="stats">
+      <span>8 reparacións superadas</span>
+      <span>Máis acción e máis contexto</span>
+      <span>As matemáticas cambian o mundo do xogo</span>
+    </div>
+    <div class="grid2">
+      <div class="card"><h3>O premio real</h3><p>Agora sabes que as matemáticas serven para <b>entender, prever e construír</b>. Unha operación pode parecer abstracta, pero nun contexto convértese nunha ferramenta.</p></div>
+      <div class="card"><h3>Queres volver?</h3><p>Podes repetir a aventura para mellorar a rapidez, usar menos pistas ou simplemente volver esmagar carrachas no camiño ao castelo.</p><div class="actions"><button class="btnMain" id="restartBtn">Xogar de novo</button></div></div>
+    </div>`;
+  document.getElementById('restartBtn').onclick=()=>window.location.reload();
+}
+
+// Scratch canvas
+let scratchCtx=null, scratchCanvas=null;
+function setupScratch(){
+  scratchCanvas=document.getElementById('scratch'); if(!scratchCanvas)return;
+  const box=scratchCanvas.getBoundingClientRect(), ratio=Math.min(window.devicePixelRatio||1,2.5);
+  scratchCanvas.width=Math.max(1,Math.round(box.width*ratio)); scratchCanvas.height=Math.max(1,Math.round(box.height*ratio));
+  scratchCtx=scratchCanvas.getContext('2d');scratchCtx.setTransform(ratio,0,0,ratio,0,0);
+  scratchCtx.lineCap='round';scratchCtx.lineJoin='round';scratchCtx.strokeStyle='#24448b';scratchCtx.lineWidth=3.8;
+  let drawing=false,last=null;
+  const pos=e=>{const r=scratchCanvas.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top}};
+  scratchCanvas.onpointerdown=e=>{e.preventDefault();scratchCanvas.setPointerCapture(e.pointerId);drawing=true;last=pos(e);scratchCtx.beginPath();scratchCtx.moveTo(last.x,last.y);scratchCtx.lineTo(last.x+.2,last.y+.2);scratchCtx.stroke()};
+  scratchCanvas.onpointermove=e=>{if(!drawing)return;e.preventDefault();const p=pos(e);scratchCtx.beginPath();scratchCtx.moveTo(last.x,last.y);scratchCtx.lineTo(p.x,p.y);scratchCtx.stroke();last=p};
+  const stop=()=>{drawing=false;last=null};scratchCanvas.onpointerup=stop;scratchCanvas.onpointercancel=stop;scratchCanvas.onlostpointercapture=stop;
+}
+function clearScratch(){if(scratchCanvas&&scratchCtx){scratchCtx.save();scratchCtx.setTransform(1,0,0,1,0,0);scratchCtx.clearRect(0,0,scratchCanvas.width,scratchCanvas.height);scratchCtx.restore()}}
+
+function playerRect(){return {x:player.x,y:player.y,w:player.w,h:player.h}}
+function currentZone(){let z=zones[0].name; for(const zone of zones) if(player.x>=zone.x) z=zone.name; return z;}
+function activePlatforms(){return platforms.filter(p=>p.requires===null || solved[p.requires]);}
+function hurt(){
+  if(player.inv>0) return; player.lives--; player.inv=90; showToast('A carracha atacoute. Volves ao último punto seguro.',1800);
+  if(player.lives<=0){ player.lives=3; solved.forEach((v,i)=>{}); }
+  player.x=player.respawnX; player.y=player.respawnY; player.vx=0; player.vy=0;
+}
+function stompEnemy(enemy){ enemy.dead=true; player.vy=-8; showToast('Carracha esmagada!'); }
+
+function update(){
+  if(paused) return;
+  frame++;
+  if(toast.classList.contains('show') && performance.now()>Number(toast.dataset.until||0)) toast.classList.remove('show');
+  if(player.inv>0) player.inv--;
+  const speed=4.2;
+  if(keys.left){ player.vx=Math.max(player.vx-0.65,-speed); player.dir=-1; }
+  if(keys.right){ player.vx=Math.min(player.vx+0.65,speed); player.dir=1; }
+  if(!keys.left && !keys.right){ player.vx*=player.onGround?0.78:0.96; if(Math.abs(player.vx)<0.08) player.vx=0; }
+  if(keys.jump && player.onGround){ player.vy=-12.6; player.onGround=false; }
+  keys.jump=false;
+  player.vy+=0.58; if(player.vy>15) player.vy=15;
+  player.x+=player.vx;
+  const solids=activePlatforms();
+  for(const p of solids){
+    if(rectsOverlap(playerRect(),p)){
+      if(player.vx>0) player.x=p.x-player.w; else if(player.vx<0) player.x=p.x+p.w;
+      player.vx=0;
+    }
+  }
+  player.y+=player.vy; player.onGround=false;
+  for(const p of solids){
+    if(rectsOverlap(playerRect(),p)){
+      if(player.vy>=0 && player.y+player.h-p.y<26){ player.y=p.y-player.h; player.vy=0; player.onGround=true; }
+      else if(player.vy<0){ player.y=p.y+p.h; player.vy=0; }
+    }
+  }
+  if(player.y>H+180){ player.x=player.respawnX; player.y=player.respawnY; player.vx=0; player.vy=0; showToast('Caíches! Volves ao último punto seguro.',1700); }
+  player.x=clamp(player.x,0,worldW-player.w);
+  // enemies
+  for(const e of enemies){
+    if(e.dead) continue;
+    e.x+=e.vx; if(e.x<e.left || e.x+e.w>e.right){ e.vx*=-1; e.x=clamp(e.x,e.left,e.right-e.w); }
+    const er={x:e.x,y:e.y,w:e.w,h:e.h};
+    if(rectsOverlap(playerRect(),er)){
+      const fromAbove = player.vy>0 && player.y+player.h-e.y<20;
+      if(fromAbove) stompEnemy(e); else hurt();
+    }
+  }
+  // triggers
+  for(const sign of signs){ if(Math.abs(player.x-sign.x)<60){ hintBar.textContent=sign.text; break; } }
+  for(let i=0;i<terminals.length;i++){
+    if(solved[i]) continue;
+    const t=terminals[i];
+    const near=Math.abs((player.x+player.w/2)-(t.x+t.w/2))<42 && Math.abs((player.y+player.h)-(t.y+60))<84;
+    if(near && player.onGround){ openChallenge(i); return; }
+  }
+  if(solved.every(Boolean) && player.x>6060){ openEnding(); return; }
+  camera += ((player.x - W*0.35) - camera)*0.12;
+  camera=clamp(camera,0,Math.max(0,worldW-W));
+  cameraY += (clamp(player.y+player.h-H*0.67,0,Math.max(0,WORLD_H-H))-cameraY)*0.14;
+  zoneLabel.textContent=currentZone();
+  progressLabel.textContent=`${solved.filter(Boolean).length} / 8`;
+  livesLabel.textContent='❤'.repeat(player.lives);
+  if(player.x<550) hintBar.textContent='Cruza o primeiro regato e busca a primeira terminal dourada.';
+  else if(player.x<1500) hintBar.textContent='Usa o salto para subir. Se ves unha carracha, pisa enriba dela.';
+  else if(player.x<3300) hintBar.textContent='As terminais fan aparecer pontes, pasos e escaleiras cando resolves as potencias.';
+  else if(player.x<5000) hintBar.textContent='As potencias xa son máis variadas. Lembra usar as pistas, o caderno e «Escena».';
+  else hintBar.textContent='Último tramo ata o castelo: baliza final e ruínas do Carbedo.';
+}
+
+function drawBackground(){
+  const sky=ctx.createLinearGradient(0,0,0,WORLD_H); sky.addColorStop(0,'#6789d4'); sky.addColorStop(.45,'#7ba0d0'); sky.addColorStop(.67,'#94a480'); sky.addColorStop(1,'#5b7047');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,WORLD_H);
+  ctx.fillStyle='#ffe28d'; ctx.beginPath(); ctx.arc(W-130,110,52,0,Math.PI*2); ctx.fill();
+  // distant mountains
+  drawMountainLayer(0.13,['#91a7c4','#7f97bb','#6b85b0']);
+  drawMountainLayer(0.26,['#6d8f86','#58776c','#4f695f']);
+  // trees/back vegetation
+  for(let i=0;i<28;i++){ const wx=i*240+90; drawTree(wx-camera*0.45,495+Math.sin(i)*12,0.75);}  
+}
+function drawMountainLayer(speed, colors){
+  const base=WORLD_H*0.62; ctx.beginPath(); ctx.moveTo(0,WORLD_H);
+  for(let x=-60;x<W+60;x+=12){
+    const wx=x+camera*speed;
+    const y=base + Math.sin(wx*0.004)*30 + Math.sin(wx*0.009+1.8)*34 + Math.cos(wx*0.018)*14;
+    ctx.lineTo(x,y);
+  }
+  ctx.lineTo(W,WORLD_H); ctx.closePath(); ctx.fillStyle=colors[0]; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(0,WORLD_H);
+  for(let x=-60;x<W+60;x+=20){
+    const wx=x+camera*speed*1.3;
+    const y=base+42 + Math.sin(wx*0.005+2)*42 + Math.cos(wx*0.013)*20;
+    ctx.lineTo(x,y);
+  }
+  ctx.lineTo(W,WORLD_H); ctx.closePath(); ctx.fillStyle=colors[1]; ctx.fill();
+}
+function drawGroundPlatform(p){
+  const x=p.x-camera, y=p.y;
+  if(x+p.w< -80 || x>W+80) return;
+  let top='#79b96d', side='#6b523a', edge='#537a4a';
+  if(p.color==='wood'){ top='#c08c59'; side='#835735'; edge='#71482c'; }
+  if(p.color==='stone'){ top='#a4acc8'; side='#7e849d'; edge='#646b87'; }
+  if(p.color==='metal'){ top='#c5e6ea'; side='#90a9b0'; edge='#698087'; }
+  if(p.color==='earth'){ top='#81a96d'; side='#6b523a'; edge='#537a4a'; }
+  ctx.fillStyle=top; ctx.fillRect(x,y,p.w,20);
+  ctx.fillStyle=edge; ctx.fillRect(x,y,p.w,6);
+  ctx.fillStyle=side; ctx.fillRect(x,y+20,p.w,p.h-20);
+  for(let i=0;i<p.w;i+=24){ ctx.fillStyle='rgba(0,0,0,.09)'; ctx.fillRect(x+i,y+20,2,p.h-20); }
+}
+function drawTree(x,y,s=1){
+  if(x<-90 || x>W+90) return;
+  ctx.fillStyle='#60422d'; ctx.fillRect(x-8*s,y-62*s,16*s,64*s);
+  const puffs=[[-16,-44,26], [12,-54,28], [-2,-72,32], [24,-36,22]];
+  for(const [ox,oy,r] of puffs){ ctx.fillStyle='#315a3f'; ctx.beginPath(); ctx.arc(x+ox*s,y+oy*s,r*s,0,Math.PI*2); ctx.fill(); }
+  ctx.fillStyle='#5f9857'; ctx.beginPath(); ctx.arc(x+2*s,y-64*s,24*s,0,Math.PI*2); ctx.fill();
+  for(let i=0;i<8;i++){ ctx.fillStyle=['#f6d178','#ef9650','#ca5f3a'][i%3]; ctx.beginPath(); ctx.arc(x+Math.sin(i*2.3)*18*s,y-48*s+Math.cos(i*3.1)*16*s,4*s,0,Math.PI*2); ctx.fill(); }
+}
+function drawHome(){
+  const x=100-camera, y=420;
+  ctx.fillStyle='#e9ddb8'; ctx.fillRect(x,y,154,120);
+  ctx.fillStyle='#cc6f5c'; ctx.beginPath(); ctx.moveTo(x-12,y+16); ctx.lineTo(x+76,y-48); ctx.lineTo(x+164,y+16); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#29335d'; ctx.fillRect(x+60,y+72,28,48);
+  ctx.fillStyle='#9ad0e6'; ctx.fillRect(x+18,y+46,34,32); ctx.fillRect(x+100,y+46,34,32);
+  ctx.fillStyle='#fef2ce'; ctx.font='900 18px Fredoka'; ctx.fillText('A túa casa',x+22,y-62);
+}
+function drawCastle(){
+  const x=5920-camera, y=220;
+  ctx.fillStyle='#52606a'; ctx.beginPath(); ctx.moveTo(x-110,560); ctx.lineTo(x-70,490); ctx.lineTo(x-28,470); ctx.lineTo(x+58,430); ctx.lineTo(x+150,560); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#8a8f8e'; ctx.fillRect(x-18,y+120,130,170); ctx.fillRect(x+82,y+80,54,210); ctx.fillRect(x-60,y+140,48,130);
+  ctx.fillStyle='#68706d'; ctx.fillRect(x+94,y+58,30,24); ctx.fillRect(x-5,y+110,20,32);
+  ctx.fillStyle='#fff0b0'; ctx.fillRect(x+103,y+100,10,20);
+  ctx.fillStyle='#f8f2d6'; ctx.font='900 20px Fredoka'; ctx.fillText('Castelo do Carbedo',x-76,y+48);
+}
+function drawTerminal(t, solvedNow){
+  const x=t.x-camera, y=t.y;
+  if(x<-70 || x>W+70) return;
+  ctx.fillStyle='#37436f'; ctx.fillRect(x+10,y+20,24,48);
+  ctx.fillStyle=solvedNow?'#79f0c8':'#ffd978'; ctx.fillRect(x,y,44,28); ctx.fillStyle='#1d2447'; ctx.fillRect(x+6,y+6,32,16);
+  ctx.fillStyle=solvedNow?'#cbfff0':'#fff7dd'; ctx.font='900 18px Fredoka'; ctx.fillText(solvedNow?'OK':'?',x+15,y+22);
+  ctx.fillStyle='#f7f0cd'; ctx.font='900 16px Fredoka'; ctx.fillText(String(t.id+1),x+15,y-8);
+}
+function drawTick(e){
+  const x=e.x-camera, y=e.y;
+  if(x<-60 || x>W+60 || e.dead) return;
+  ctx.fillStyle='#49673f'; ctx.beginPath(); ctx.ellipse(x+17,y+12,18,11,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#7fac54'; ctx.beginPath(); ctx.arc(x+10,y+10,6,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#243020'; ctx.lineWidth=3;
+  for(let i=0;i<4;i++){ ctx.beginPath(); ctx.moveTo(x+8+i*6,y+14); ctx.lineTo(x-4+i*10,y+22+i%2*2); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x+8+i*6,y+14); ctx.lineTo(x-4+i*10,y+4-i%2*2); ctx.stroke(); }
+}
+function drawPlayer(){
+  const x=player.x-camera, y=player.y;
+  ctx.save();
+  if(player.inv>0 && Math.floor(player.inv/5)%2===0) ctx.globalAlpha=.55;
+  if(player.dir<0){ ctx.translate(x+player.w/2,0); ctx.scale(-1,1); ctx.translate(-(x+player.w/2),0); }
+  ctx.fillStyle='#2a315e'; ctx.fillRect(x+12,y+40,8,12); ctx.fillRect(x+22,y+40,8,12);
+  ctx.fillStyle='#ef8067'; ctx.fillRect(x+9,y+18,22,24);
+  ctx.fillStyle='#ffd3ae'; ctx.fillRect(x+12,y+2,18,18);
+  ctx.fillStyle='#433252'; ctx.fillRect(x+10,y,22,8); ctx.fillRect(x+8,y+6,26,4);
+  ctx.fillStyle='#1f2749'; ctx.fillRect(x+4,y+20,7,18); ctx.fillRect(x+29,y+20,7,18);
+  ctx.fillStyle='#fff'; ctx.fillRect(x+24,y+10,3,3);
+  ctx.fillStyle='#ffd978'; ctx.fillRect(x+4,y+30,6,10);
+  ctx.restore();
+}
+
+function drawHUDObjects(){
+  for(const p of activePlatforms()) drawGroundPlatform(p);
+  for(const s of signs){ const x=s.x-camera, y=505; if(x>-50&&x<W+50){ ctx.fillStyle='#774d2c'; ctx.fillRect(x,y,8,42); ctx.fillStyle='#f8df8e'; ctx.fillRect(x-34,y-24,78,26); ctx.fillStyle='#413217'; ctx.font='900 12px Nunito'; ctx.fillText('ATENCIÓN',x-26,y-7); }}
+  terminals.forEach((t,i)=>drawTerminal(t,solved[i]));
+  enemies.forEach(drawTick);
+  drawHome(); drawCastle();
+}
+
+function render(){
+  const ratio=Math.min(window.devicePixelRatio||1,2.5);
+  ctx.setTransform(drawScale*ratio,0,0,drawScale*ratio,0,0);
+  ctx.clearRect(0,0,W,H);
+  ctx.save(); ctx.translate(0,-cameraY);
+  drawBackground(); drawHUDObjects(); drawPlayer();
+  ctx.restore();
+}
+
+window.addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase();
+  if(k==='arrowleft'||k==='a') keys.left=true;
+  if(k==='arrowright'||k==='d') keys.right=true;
+  if(k==='arrowup'||k==='w'||k===' ') { keys.jump=true; e.preventDefault(); }
+});
+window.addEventListener('keyup',e=>{
+  const k=e.key.toLowerCase();
+  if(k==='arrowleft'||k==='a') keys.left=false;
+  if(k==='arrowright'||k==='d') keys.right=false;
+  if(k==='arrowup'||k==='w'||k===' ') keys.jump=false;
+});
+window.addEventListener('blur',()=>{keys.left=keys.right=keys.jump=false});
+[['left','left'],['right','right'],['jump','jump']].forEach(([id,key])=>{
+  const b=document.getElementById(id);
+  b.addEventListener('pointerdown',e=>{e.preventDefault(); keys[key]=true; b.setPointerCapture(e.pointerId)});
+  ['pointerup','pointercancel','lostpointercapture','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>keys[key]=false));
+});
+
+// Canvas: preserve useful sprite size instead of shrinking the whole 1280px world on phones.
+function sizeGame(){
+  const full=!!document.fullscreenElement || app.classList.contains('pseudo-fullscreen');
+  if(!full){
+    const width=shell.getBoundingClientRect().width||window.innerWidth-16;
+    const landscape=window.innerWidth>window.innerHeight;
+    let desired;
+    if(width<=600) desired=Math.min(width*1.23,Math.max(250,window.innerHeight-155));
+    else if(width<=920) desired=landscape?Math.min(width*.58,Math.max(260,window.innerHeight-145)):Math.min(width*.77,Math.max(330,window.innerHeight-155));
+    else desired=Math.min(width*9/16,Math.max(350,window.innerHeight-150));
+    shell.style.height=Math.round(desired)+'px';
+  }else shell.style.height='';
+  const r=shell.getBoundingClientRect(), cw=Math.max(160,r.width), ch=Math.max(180,r.height);
+  const narrow=cw<620, portrait=ch>=cw*.9;
+  const targetWorldW=narrow ? (portrait?550:720) : cw<950 ? (portrait?960:1030) : 1280;
+  drawScale=Math.max(cw/targetWorldW, ch/WORLD_H);
+  W=cw/drawScale;H=ch/drawScale;
+  const ratio=Math.min(window.devicePixelRatio||1,2.5);
+  const pxW=Math.max(1,Math.round(cw*ratio)),pxH=Math.max(1,Math.round(ch*ratio));
+  if(canvas.width!==pxW ||canvas.height!==pxH){canvas.width=pxW;canvas.height=pxH;}
+  ctx.imageSmoothingEnabled=true;
+  camera=clamp(camera,0,Math.max(0,worldW-W));
+  cameraY=clamp(cameraY,0,Math.max(0,WORLD_H-H));
+  updatePageScroll();
+}
+function isFull(){return !!document.fullscreenElement||app.classList.contains('pseudo-fullscreen')}
+function syncFsLabel(){fullscreenText.textContent=isFull()?'Saír de pantalla completa':'Pantalla completa'; fullscreenBtn.title=isFull()?'Saír de pantalla completa':'Xogar a pantalla completa'}
+async function toggleFullscreen(){
+  if(document.fullscreenElement){try{await document.exitFullscreen()}catch(e){}; return;}
+  if(app.classList.contains('pseudo-fullscreen')){app.classList.remove('pseudo-fullscreen');document.body.classList.remove('pseudo-mode');syncFsLabel();sizeGame();return;}
+  if(app.requestFullscreen){
+    try{await app.requestFullscreen();syncFsLabel();requestAnimationFrame(sizeGame);return}catch(e){}
+  }
+  // Fallback on iOS Safari, which may not allow Fullscreen API on arbitrary HTML.
+  app.classList.add('pseudo-fullscreen');document.body.classList.add('pseudo-mode');syncFsLabel();requestAnimationFrame(sizeGame);
+  showToast('Vista ampliada. O navegador pode conservar as súas barras neste dispositivo.',3200);
+}
+fullscreenBtn.addEventListener('click',toggleFullscreen);
+document.addEventListener('fullscreenchange',()=>{syncFsLabel();setTimeout(sizeGame,60)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&app.classList.contains('pseudo-fullscreen'))toggleFullscreen()});
+function updateScrollIndicators(){
+  const indicator=document.getElementById('scrollNotice');
+  if(!indicator)return;
+  const hasMore=modal.classList.contains('show')&&panel.scrollHeight-panel.clientHeight>26;
+  const remain=panel.scrollHeight-panel.clientHeight-panel.scrollTop;
+  indicator.hidden=!(hasMore&&remain>25);
+}
+const scrollHint=document.getElementById('pageScrollNotice');
+function updatePageScroll(){
+  const hasMore=!isFull()&&document.documentElement.scrollHeight>window.innerHeight+55;
+  const remain=document.documentElement.scrollHeight-window.scrollY-window.innerHeight;
+  scrollHint.hidden=!(hasMore&&remain>80 && window.scrollY<30);
+}
+panel.addEventListener('scroll',updateScrollIndicators,{passive:true});
+const panelObserver=new MutationObserver(()=>requestAnimationFrame(updateScrollIndicators));panelObserver.observe(panel,{childList:true,subtree:false});
+window.addEventListener('scroll',updatePageScroll,{passive:true});
+let resizeQueued=false;
+function scheduleSize(){if(resizeQueued)return;resizeQueued=true;requestAnimationFrame(()=>{resizeQueued=false;sizeGame();requestAnimationFrame(updateScrollIndicators)})}
+window.addEventListener('resize',scheduleSize);
+window.addEventListener('orientationchange',()=>setTimeout(scheduleSize,180));
+if(window.visualViewport)window.visualViewport.addEventListener('resize',scheduleSize);
+function loop(){update();render();requestAnimationFrame(loop)}
+launchIntro(); sizeGame(); syncFsLabel(); loop();
+})();
+</script>
+</body>
+</html>
